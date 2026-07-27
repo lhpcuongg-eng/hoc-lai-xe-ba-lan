@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Học bằng lái xe Ba Lan</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface-2: #243044;
+      --text: #e8edf4;
+      --text-muted: #8b9cb3;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --border: #2d3a4f;
+      --radius: 14px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px 16px calc(24px + var(--safe-bottom));
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .lang-toggle {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+    }
+
+    .lang-toggle button {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 10px 4px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      line-height: 1.2;
+    }
+
+    .lang-toggle button.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--surface);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #6366f1);
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .question-text {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .question-text.secondary {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .question-image {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      background: var(--surface-2);
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      text-align: left;
+      width: 100%;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .option:hover:not(:disabled) {
+      border-color: var(--accent);
+    }
+
+    .option.selected {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.12);
+    }
+
+    .option.correct {
+      border-color: var(--success);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .option.incorrect {
+      border-color: var(--error);
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .option:disabled {
+      cursor: default;
+    }
+
+    .option-letter {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .option.selected .option-letter {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .option.correct .option-letter {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .option.incorrect .option-letter {
+      background: var(--error);
+      color: #fff;
+    }
+
+    .option-content {
+      flex: 1;
+    }
+
+    .option-content .secondary {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .explanation {
+      margin-top: 16px;
+      padding: 14px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 12px;
+      display: none;
+    }
+
+    .explanation.visible {
+      display: block;
+    }
+
+    .explanation h3 {
+      font-size: 0.85rem;
+      color: var(--warning);
+      margin-bottom: 6px;
+    }
+
+    .explanation p {
+      font-size: 0.9rem;
+    }
+
+    .result-badge {
+      display: none;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .result-badge.visible {
+      display: block;
+    }
+
+    .result-badge.correct {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+
+    .result-badge.incorrect {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--error);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--border);
+    }
+
+    .loading, .error-state, .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+    }
+
+    .loading .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-state {
+      color: var(--error);
+    }
+
+    .config-note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 24px;
+      padding: 12px;
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px dashed var(--border);
+    }
+
+    .config-note code {
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🚗 Học bằng lái xe Ba Lan</h1>
+      <p>Prawo jazdy · Song ngữ Việt – Ba Lan</p>
+    </header>
+
+    <div class="lang-toggle" role="group" aria-label="Chế độ ngôn ngữ">
+      <button type="button" data-mode="pl" class="active">Chỉ tiếng Ba Lan</button>
+      <button type="button" data-mode="vi">Chỉ tiếng Việt</button>
+      <button type="button" data-mode="both">Song ngữ</button>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Đang tải câu hỏi...</p>
+    </div>
+
+    <div id="error" class="error-state hidden"></div>
+    <div id="empty" class="empty-state hidden">
+      <p>Chưa có câu hỏi nào trong cơ sở dữ liệu.</p>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <div class="progress-bar">
+        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+      </div>
+      <p id="progressText" class="progress-text"></p>
+
+      <div class="card">
+        <div id="resultBadge" class="result-badge"></div>
+        <div id="questionArea"></div>
+
+        <div id="options" class="options"></div>
+
+        <div id="explanation" class="explanation">
+          <h3>💡 Giải thích</h3>
+          <p id="explanationText"></p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="checkBtn" type="button" class="btn btn-primary" disabled>Kiểm tra đáp án</button>
+        <button id="nextBtn" type="button" class="btn btn-secondary hidden">Câu tiếp theo →</button>
+      </div>
+    </div>
+
+    <div class="config-note">
+      Cấu hình Supabase trong file này: <code>SUPABASE_URL</code> và <code>SUPABASE_ANON_KEY</code>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════
+    //  CẤU HÌNH SUPABASE — điền thông tin của bạn
+    // ═══════════════════════════════════════════
+    const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+    const TABLE_NAME = 'questions';
+
+    // ═══════════════════════════════════════════
+
+    let langMode = 'pl';
+    let questions = [];
+    let currentIndex = 0;
+    let selectedAnswer = null;
+    let answered = false;
+    let supabaseClient = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    function initSupabase() {
+      if (!SUPABASE_URL.includes('YOUR_PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR_ANON')) {
+        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    }
+
+    async function loadQuestions() {
+      $('loading').classList.remove('hidden');
+      $('error').classList.add('hidden');
+      $('quiz').classList.add('hidden');
+      $('empty').classList.add('hidden');
+
+      if (!supabaseClient) {
+        showError(
+          'Chưa cấu hình Supabase. Mở file index.html và thay SUPABASE_URL cùng SUPABASE_ANON_KEY bằng thông tin dự án của bạn.'
+        );
+        return;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from(TABLE_NAME)
+          .select('*')
+          .order('id', { ascending: true });
+
+        if (error) throw error;
+
+        questions = data || [];
+        $('loading').classList.add('hidden');
+
+        if (questions.length === 0) {
+          $('empty').classList.remove('hidden');
+          return;
+        }
+
+        currentIndex = 0;
+        $('quiz').classList.remove('hidden');
+        renderQuestion();
+      } catch (err) {
+        showError('Lỗi khi tải dữ liệu: ' + (err.message || err));
+      }
+    }
+
+    function showError(msg) {
+      $('loading').classList.add('hidden');
+      $('error').textContent = msg;
+      $('error').classList.remove('hidden');
+    }
+
+    function getField(q, fieldPl, fieldVi) {
+      if (langMode === 'pl') return q[fieldPl] || '';
+      if (langMode === 'vi') return q[fieldVi] || '';
+      const pl = q[fieldPl] || '';
+      const vi = q[fieldVi] || '';
+      if (pl && vi) return { primary: pl, secondary: vi };
+      return pl || vi;
+    }
+
+    function renderTextBlock(container, fieldPl, fieldVi) {
+      const content = getField(questions[currentIndex], fieldPl, fieldVi);
+      if (typeof content === 'string') {
+        const el = document.createElement('div');
+        el.className = 'question-text';
+        el.textContent = content;
+        container.appendChild(el);
+      } else if (content.primary) {
+        const primary = document.createElement('div');
+        primary.className = 'question-text';
+        primary.textContent = content.primary;
+        container.appendChild(primary);
+
+        if (content.secondary) {
+          const secondary = document.createElement('div');
+          secondary.className = 'question-text secondary';
+          secondary.textContent = content.secondary;
+          container.appendChild(secondary);
+        }
+      }
+    }
+
+    function renderQuestion() {
+      const q = questions[currentIndex];
+      selectedAnswer = null;
+      answered = false;
+
+      const total = questions.length;
+      const pct = ((currentIndex + 1) / total) * 100;
+      $('progressFill').style.width = pct + '%';
+      $('progressText').textContent = `Câu ${currentIndex + 1} / ${total}`;
+
+      const questionArea = $('questionArea');
+      questionArea.innerHTML = '';
+
+      if (q.image_url) {
+        const img = document.createElement('img');
+        img.src = q.image_url;
+        img.alt = 'Hình minh họa câu hỏi';
+        img.className = 'question-image';
+        img.loading = 'lazy';
+        questionArea.appendChild(img);
+      }
+
+      renderTextBlock(questionArea, 'question_pl', 'question_vi');
+
+      const optionsEl = $('options');
+      optionsEl.innerHTML = '';
+
+      const letters = ['A', 'B', 'C'];
+      const optionKeys = [
+        ['option_a_pl', 'option_a_vi'],
+        ['option_b_pl', 'option_b_vi'],
+        ['option_c_pl', 'option_c_vi'],
+      ];
+
+      optionKeys.forEach(([plKey, viKey], i) => {
+        const letter = letters[i];
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'option';
+        btn.dataset.letter = letter;
+
+        const letterEl = document.createElement('span');
+        letterEl.className = 'option-letter';
+        letterEl.textContent = letter;
+
+        const contentEl = document.createElement('div');
+        contentEl.className = 'option-content';
+
+        const content = getField(q, plKey, viKey);
+        if (typeof content === 'string') {
+          contentEl.textContent = content;
+        } else {
+          const primary = document.createElement('div');
+          primary.textContent = content.primary;
+          contentEl.appendChild(primary);
+          if (content.secondary) {
+            const secondary = document.createElement('div');
+            secondary.className = 'secondary';
+            secondary.textContent = content.secondary;
+            contentEl.appendChild(secondary);
+          }
+        }
+
+        btn.appendChild(letterEl);
+        btn.appendChild(contentEl);
+
+        btn.addEventListener('click', () => selectOption(letter, btn));
+        optionsEl.appendChild(btn);
+      });
+
+      $('resultBadge').className = 'result-badge';
+      $('resultBadge').textContent = '';
+      $('explanation').classList.remove('visible');
+      $('explanationText').textContent = q.explanation_vi || 'Không có giải thích.';
+
+      $('checkBtn').disabled = true;
+      $('checkBtn').classList.remove('hidden');
+      $('nextBtn').classList.add('hidden');
+    }
+
+    function selectOption(letter, btnEl) {
+      if (answered) return;
+
+      selectedAnswer = letter;
+      document.querySelectorAll('.option').forEach((el) => el.classList.remove('selected'));
+      btnEl.classList.add('selected');
+      $('checkBtn').disabled = false;
+    }
+
+    function checkAnswer() {
+      if (!selectedAnswer || answered) return;
+
+      answered = true;
+      const q = questions[currentIndex];
+      const correct = (q.correct_answer || '').toUpperCase().trim();
+      const isCorrect = selectedAnswer === correct;
+
+      document.querySelectorAll('.option').forEach((el) => {
+        el.disabled = true;
+        const letter = el.dataset.letter;
+        if (letter === correct) el.classList.add('correct');
+        else if (letter === selectedAnswer) el.classList.add('incorrect');
+      });
+
+      const badge = $('resultBadge');
+      badge.className = 'result-badge visible ' + (isCorrect ? 'correct' : 'incorrect');
+      badge.textContent = isCorrect ? '✓ Chính xác!' : '✗ Sai rồi — đáp án đúng là ' + correct;
+
+      $('explanation').classList.add('visible');
+      $('checkBtn').classList.add('hidden');
+      $('nextBtn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        renderQuestion();
+      } else {
+        currentIndex = 0;
+        renderQuestion();
+      }
+    }
+
+    document.querySelectorAll('.lang-toggle button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.lang-toggle button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        langMode = btn.dataset.mode;
+        if (questions.length > 0) renderQuestion();
+      });
+    });
+
+    $('checkBtn').addEventListener('click', checkAnswer);
+    $('nextBtn').addEventListener('click', nextQuestion);
+
+    initSupabase();
+    loadQuestions();
+  </script>
+</body>
+</html>
