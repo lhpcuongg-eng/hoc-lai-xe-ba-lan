@@ -45,7 +45,7 @@
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     header h1 {
@@ -57,6 +57,85 @@
     header p {
       font-size: 0.85rem;
       color: var(--text-muted);
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .stat-value.success { color: var(--success); }
+    .stat-value.warning { color: var(--warning); }
+
+    .stat-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .filter-row {
+      margin-bottom: 14px;
+    }
+
+    .filter-row label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .filter-row select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 0.9rem;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%238b9cb3' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+
+    .resume-banner {
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .resume-banner button {
+      flex-shrink: 0;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px;
     }
 
     .lang-toggle {
@@ -107,6 +186,17 @@
       color: var(--text-muted);
       margin-bottom: 16px;
       text-align: center;
+    }
+
+    .topic-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      margin-bottom: 12px;
     }
 
     .card {
@@ -310,6 +400,41 @@
       background: var(--border);
     }
 
+    .btn-danger {
+      background: transparent;
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      font-size: 0.85rem;
+      padding: 10px;
+    }
+
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .summary-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .summary-score {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      margin: 16px 0 4px;
+    }
+
+    .summary-detail {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
     .loading, .error-state, .empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -364,6 +489,33 @@
       <p>Prawo jazdy · Song ngữ Việt – Ba Lan</p>
     </header>
 
+    <div id="statsBar" class="stats-bar hidden">
+      <div class="stat-item">
+        <div id="sessionScore" class="stat-value">0/0</div>
+        <div class="stat-label">Phiên này</div>
+      </div>
+      <div class="stat-item">
+        <div id="totalScore" class="stat-value success">0/0</div>
+        <div class="stat-label">Tổng cộng</div>
+      </div>
+      <div class="stat-item">
+        <div id="percentScore" class="stat-value warning">—</div>
+        <div class="stat-label">Tỷ lệ đúng</div>
+      </div>
+    </div>
+
+    <div id="resumeBanner" class="resume-banner hidden">
+      <span id="resumeText"></span>
+      <button type="button" id="dismissResume" aria-label="Đóng">×</button>
+    </div>
+
+    <div id="filterRow" class="filter-row hidden">
+      <label for="topicFilter">📂 Lọc theo chủ đề</label>
+      <select id="topicFilter">
+        <option value="all">Tất cả chủ đề</option>
+      </select>
+    </div>
+
     <div class="lang-toggle" role="group" aria-label="Chế độ ngôn ngữ">
       <button type="button" data-mode="pl" class="active">Chỉ tiếng Ba Lan</button>
       <button type="button" data-mode="vi">Chỉ tiếng Việt</button>
@@ -387,6 +539,7 @@
       <p id="progressText" class="progress-text"></p>
 
       <div class="card">
+        <div id="topicBadge" class="topic-badge hidden"></div>
         <div id="resultBadge" class="result-badge"></div>
         <div id="questionArea"></div>
 
@@ -401,30 +554,49 @@
       <div class="actions">
         <button id="checkBtn" type="button" class="btn btn-primary" disabled>Kiểm tra đáp án</button>
         <button id="nextBtn" type="button" class="btn btn-secondary hidden">Câu tiếp theo →</button>
+        <button id="resetBtn" type="button" class="btn btn-danger">↺ Xóa tiến độ học</button>
+      </div>
+    </div>
+
+    <div id="summary" class="hidden">
+      <div class="summary-card">
+        <h2>🎉 Hoàn thành!</h2>
+        <p id="summaryTopic" class="summary-detail"></p>
+        <div id="summaryScoreBig" class="summary-score">0%</div>
+        <p id="summaryDetail" class="summary-detail"></p>
+        <button id="restartBtn" type="button" class="btn btn-primary">Học lại từ đầu</button>
+        <button id="continueBtn" type="button" class="btn btn-secondary" style="margin-top:10px">Chọn chủ đề khác</button>
       </div>
     </div>
 
     <div class="config-note">
-      Cấu hình Supabase trong file này: <code>SUPABASE_URL</code> và <code>SUPABASE_ANON_KEY</code>
+      Cấu hình Supabase: <code>SUPABASE_URL</code>, <code>SUPABASE_ANON_KEY</code> · Tiến độ lưu tự động trên trình duyệt
     </div>
   </div>
 
   <script>
-    // ═══════════════════════════════════════════
-    //  CẤU HÌNH SUPABASE — điền thông tin của bạn
-    // ═══════════════════════════════════════════
-    const SUPABASE_URL = 'https://vhchkrogljjazjdaqudp.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoY2hrcm9nbGpqYXpqZGFxdWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUxNDQ4NjgsImV4cCI6MjEwMDcyMDg2OH0.a9_NRH1kts-iE_aOA5R7GGyZcBPUegKI0VZ8NWZgiII';
+    const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
     const TABLE_NAME = 'questions';
-
-    // ═══════════════════════════════════════════
+    const STORAGE_KEY = 'hoc-lai-xe-ba-lan-progress';
 
     let langMode = 'pl';
-    let questions = [];
+    let allQuestions = [];
+    let filteredQuestions = [];
     let currentIndex = 0;
     let selectedAnswer = null;
     let answered = false;
+    let selectedTopic = 'all';
     let supabaseClient = null;
+
+    let progress = {
+      langMode: 'pl',
+      selectedTopic: 'all',
+      currentQuestionId: null,
+      session: { correct: 0, total: 0 },
+      overall: { correct: 0, total: 0 },
+      answered: {},
+    };
 
     const $ = (id) => document.getElementById(id);
 
@@ -434,11 +606,123 @@
       }
     }
 
+    function loadProgress() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        progress = { ...progress, ...saved };
+        langMode = progress.langMode || 'pl';
+        selectedTopic = progress.selectedTopic || 'all';
+      } catch (_) {}
+    }
+
+    function saveProgress() {
+      progress.langMode = langMode;
+      progress.selectedTopic = selectedTopic;
+      progress.currentQuestionId = filteredQuestions[currentIndex]?.id ?? null;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+      } catch (_) {}
+    }
+
+    function resetProgress() {
+      if (!confirm('Xóa toàn bộ tiến độ học (điểm số, câu đã làm)?')) return;
+      progress = {
+        langMode,
+        selectedTopic,
+        currentQuestionId: null,
+        session: { correct: 0, total: 0 },
+        overall: { correct: 0, total: 0 },
+        answered: {},
+      };
+      currentIndex = 0;
+      saveProgress();
+      updateStats();
+      hideSummary();
+      $('quiz').classList.remove('hidden');
+      renderQuestion();
+    }
+
+    function getTopicLabel(q) {
+      if (langMode === 'vi' && q.topic_vi) return q.topic_vi;
+      if (langMode === 'pl' && q.topic_pl) return q.topic_pl;
+      if (q.topic_vi && q.topic_pl && langMode === 'both') {
+        return q.topic_pl + ' · ' + q.topic_vi;
+      }
+      return q.topic_vi || q.topic_pl || q.topic || 'Khác';
+    }
+
+    function getUniqueTopics() {
+      const map = new Map();
+      allQuestions.forEach((q) => {
+        const key = q.topic || 'khac';
+        if (!map.has(key)) {
+          map.set(key, {
+            key,
+            label: getTopicLabel({ ...q, topic: key }),
+          });
+        }
+      });
+      return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    function applyTopicFilter() {
+      if (selectedTopic === 'all') {
+        filteredQuestions = [...allQuestions];
+      } else {
+        filteredQuestions = allQuestions.filter((q) => (q.topic || 'khac') === selectedTopic);
+      }
+
+      if (progress.currentQuestionId) {
+        const idx = filteredQuestions.findIndex((q) => q.id === progress.currentQuestionId);
+        currentIndex = idx >= 0 ? idx : 0;
+      } else {
+        currentIndex = 0;
+      }
+    }
+
+    function populateTopicFilter() {
+      const select = $('topicFilter');
+      const topics = getUniqueTopics();
+      select.innerHTML = '<option value="all">Tất cả chủ đề (' + allQuestions.length + ')</option>';
+      topics.forEach(({ key, label }) => {
+        const count = allQuestions.filter((q) => (q.topic || 'khac') === key).length;
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = label + ' (' + count + ')';
+        select.appendChild(opt);
+      });
+      select.value = selectedTopic;
+    }
+
+    function updateStats() {
+      const session = progress.session;
+      const overall = progress.overall;
+      $('sessionScore').textContent = session.correct + '/' + session.total;
+      $('totalScore').textContent = overall.correct + '/' + overall.total;
+      const pct = overall.total > 0 ? Math.round((overall.correct / overall.total) * 100) : null;
+      $('percentScore').textContent = pct !== null ? pct + '%' : '—';
+    }
+
+    function showResumeBanner() {
+      if (!progress.currentQuestionId || progress.overall.total === 0) return;
+      const q = allQuestions.find((q) => q.id === progress.currentQuestionId);
+      if (!q) return;
+      const topicLabel = selectedTopic === 'all' ? 'tất cả chủ đề' : getTopicLabel(q);
+      $('resumeText').textContent =
+        '📌 Tiếp tục học — ' + topicLabel + ' · Đã làm ' + progress.overall.total + ' câu';
+      $('resumeBanner').classList.remove('hidden');
+    }
+
     async function loadQuestions() {
       $('loading').classList.remove('hidden');
       $('error').classList.add('hidden');
       $('quiz').classList.add('hidden');
+      $('summary').classList.add('hidden');
       $('empty').classList.add('hidden');
+      $('statsBar').classList.add('hidden');
+      $('filterRow').classList.add('hidden');
 
       if (!supabaseClient) {
         showError(
@@ -455,20 +739,39 @@
 
         if (error) throw error;
 
-        questions = data || [];
+        allQuestions = data || [];
         $('loading').classList.add('hidden');
 
-        if (questions.length === 0) {
+        if (allQuestions.length === 0) {
           $('empty').classList.remove('hidden');
           return;
         }
 
-        currentIndex = 0;
+        populateTopicFilter();
+        applyTopicFilter();
+
+        if (filteredQuestions.length === 0) {
+          $('empty').textContent = 'Không có câu hỏi trong chủ đề đã chọn.';
+          $('empty').classList.remove('hidden');
+          return;
+        }
+
+        applyLangModeUI();
+        $('statsBar').classList.remove('hidden');
+        $('filterRow').classList.remove('hidden');
         $('quiz').classList.remove('hidden');
+        updateStats();
+        showResumeBanner();
         renderQuestion();
       } catch (err) {
         showError('Lỗi khi tải dữ liệu: ' + (err.message || err));
       }
+    }
+
+    function applyLangModeUI() {
+      document.querySelectorAll('.lang-toggle button').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.mode === langMode);
+      });
     }
 
     function showError(msg) {
@@ -486,8 +789,8 @@
       return pl || vi;
     }
 
-    function renderTextBlock(container, fieldPl, fieldVi) {
-      const content = getField(questions[currentIndex], fieldPl, fieldVi);
+    function renderTextBlock(container, q, fieldPl, fieldVi) {
+      const content = getField(q, fieldPl, fieldVi);
       if (typeof content === 'string') {
         const el = document.createElement('div');
         el.className = 'question-text';
@@ -509,14 +812,27 @@
     }
 
     function renderQuestion() {
-      const q = questions[currentIndex];
+      const q = filteredQuestions[currentIndex];
+      if (!q) return;
+
       selectedAnswer = null;
       answered = false;
+      saveProgress();
 
-      const total = questions.length;
+      const total = filteredQuestions.length;
+      const answeredInTopic = filteredQuestions.filter((item) => progress.answered[item.id]).length;
       const pct = ((currentIndex + 1) / total) * 100;
       $('progressFill').style.width = pct + '%';
-      $('progressText').textContent = `Câu ${currentIndex + 1} / ${total}`;
+      $('progressText').textContent =
+        'Câu ' + (currentIndex + 1) + ' / ' + total + ' · Đã làm ' + answeredInTopic + '/' + total;
+
+      const badge = $('topicBadge');
+      if (q.topic || q.topic_vi || q.topic_pl) {
+        badge.textContent = getTopicLabel(q);
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
 
       const questionArea = $('questionArea');
       questionArea.innerHTML = '';
@@ -530,7 +846,7 @@
         questionArea.appendChild(img);
       }
 
-      renderTextBlock(questionArea, 'question_pl', 'question_vi');
+      renderTextBlock(questionArea, q, 'question_pl', 'question_vi');
 
       const optionsEl = $('options');
       optionsEl.innerHTML = '';
@@ -573,7 +889,6 @@
 
         btn.appendChild(letterEl);
         btn.appendChild(contentEl);
-
         btn.addEventListener('click', () => selectOption(letter, btn));
         optionsEl.appendChild(btn);
       });
@@ -588,61 +903,198 @@
       $('nextBtn').classList.add('hidden');
     }
 
+    const OPTION_DEFS = [
+      ['A', 'option_a_pl', 'option_a_vi'],
+      ['B', 'option_b_pl', 'option_b_vi'],
+      ['C', 'option_c_pl', 'option_c_vi'],
+    ];
+
+    function normalizeText(value) {
+      return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function getRawCorrectAnswer(q) {
+      return q.correct_option ?? q.correct_answer ?? q.correct ?? q.answer ?? '';
+    }
+
+    /** Chuyển correct_option / correct_answer từ DB sang A/B/C */
+    function resolveCorrectLetter(q) {
+      const raw = getRawCorrectAnswer(q);
+      const str = String(raw ?? '').trim();
+      if (!str) return null;
+
+      const upper = str.toUpperCase();
+      if (/^[ABC]$/.test(upper)) return upper;
+
+      const optionMatch = str.match(/^OPTION[_\s-]?([ABC])$/i);
+      if (optionMatch) return optionMatch[1].toUpperCase();
+
+      const num = Number(str);
+      if (!Number.isNaN(num)) {
+        if (num >= 1 && num <= 3) return OPTION_DEFS[num - 1][0];
+        if (num >= 0 && num <= 2) return OPTION_DEFS[num][0];
+      }
+
+      const normalizedRaw = normalizeText(str);
+      for (const [letter, plKey, viKey] of OPTION_DEFS) {
+        const texts = [q[plKey], q[viKey]].filter(Boolean).map(normalizeText);
+        if (texts.some((t) => t === normalizedRaw || t.includes(normalizedRaw) || normalizedRaw.includes(t))) {
+          return letter;
+        }
+      }
+
+      return null;
+    }
+
     function selectOption(letter, btnEl) {
       if (answered) return;
-
       selectedAnswer = letter;
       document.querySelectorAll('.option').forEach((el) => el.classList.remove('selected'));
       btnEl.classList.add('selected');
       $('checkBtn').disabled = false;
     }
 
+    function recordAnswer(q, isCorrect) {
+      const id = String(q.id);
+      const alreadyAnswered = progress.answered[id];
+
+      if (!alreadyAnswered) {
+        progress.overall.total++;
+        if (isCorrect) progress.overall.correct++;
+      } else if (alreadyAnswered.correct !== isCorrect) {
+        if (alreadyAnswered.correct) progress.overall.correct--;
+        if (isCorrect) progress.overall.correct++;
+      }
+
+      progress.session.total++;
+      if (isCorrect) progress.session.correct++;
+
+      progress.answered[id] = { correct: isCorrect, at: Date.now() };
+      saveProgress();
+      updateStats();
+    }
+
     function checkAnswer() {
       if (!selectedAnswer || answered) return;
 
       answered = true;
-      const q = questions[currentIndex];
-      const correct = (q.correct_answer || '').toUpperCase().trim();
-      const isCorrect = selectedAnswer === correct;
+      const q = filteredQuestions[currentIndex];
+      const correct = resolveCorrectLetter(q);
+      const isCorrect = correct ? selectedAnswer === correct : false;
+
+      recordAnswer(q, isCorrect);
 
       document.querySelectorAll('.option').forEach((el) => {
         el.disabled = true;
         const letter = el.dataset.letter;
-        if (letter === correct) el.classList.add('correct');
-        else if (letter === selectedAnswer) el.classList.add('incorrect');
+        if (correct && letter === correct) el.classList.add('correct');
+        else if (letter === selectedAnswer && !isCorrect) el.classList.add('incorrect');
       });
 
       const badge = $('resultBadge');
       badge.className = 'result-badge visible ' + (isCorrect ? 'correct' : 'incorrect');
-      badge.textContent = isCorrect ? '✓ Chính xác!' : '✗ Sai rồi — đáp án đúng là ' + correct;
+      if (isCorrect) {
+        badge.textContent = '✓ Chính xác!';
+      } else if (correct) {
+        badge.textContent = '✗ Sai rồi — đáp án đúng là ' + correct;
+      } else {
+        badge.textContent =
+          '⚠ Chưa cấu hình đáp án trong DB — hãy đặt correct_option = "A", "B" hoặc "C"';
+      }
 
       $('explanation').classList.add('visible');
       $('checkBtn').classList.add('hidden');
       $('nextBtn').classList.remove('hidden');
+
+      const isLast = currentIndex >= filteredQuestions.length - 1;
+      $('nextBtn').textContent = isLast ? 'Xem kết quả →' : 'Câu tiếp theo →';
+    }
+
+    function showSummary() {
+      $('quiz').classList.add('hidden');
+      $('summary').classList.remove('hidden');
+
+      const session = progress.session;
+      const pct = session.total > 0 ? Math.round((session.correct / session.total) * 100) : 0;
+      const topicLabel =
+        selectedTopic === 'all'
+          ? 'Tất cả chủ đề'
+          : getTopicLabel(allQuestions.find((q) => (q.topic || 'khac') === selectedTopic) || {});
+
+      $('summaryTopic').textContent = topicLabel + ' · ' + filteredQuestions.length + ' câu hỏi';
+      $('summaryScoreBig').textContent = pct + '%';
+      $('summaryDetail').textContent =
+        'Phiên này: ' + session.correct + '/' + session.total + ' đúng · Tổng cộng: ' +
+        progress.overall.correct + '/' + progress.overall.total;
+    }
+
+    function hideSummary() {
+      $('summary').classList.add('hidden');
     }
 
     function nextQuestion() {
-      if (currentIndex < questions.length - 1) {
+      if (currentIndex < filteredQuestions.length - 1) {
         currentIndex++;
         renderQuestion();
       } else {
-        currentIndex = 0;
-        renderQuestion();
+        showSummary();
       }
     }
 
+    function restartSession() {
+      progress.session = { correct: 0, total: 0 };
+      currentIndex = 0;
+      saveProgress();
+      hideSummary();
+      $('quiz').classList.remove('hidden');
+      updateStats();
+      renderQuestion();
+    }
+
+    $('topicFilter').addEventListener('change', (e) => {
+      selectedTopic = e.target.value;
+      applyTopicFilter();
+      progress.session = { correct: 0, total: 0 };
+      currentIndex = 0;
+      saveProgress();
+      updateStats();
+
+      if (filteredQuestions.length === 0) {
+        $('quiz').classList.add('hidden');
+        $('empty').textContent = 'Không có câu hỏi trong chủ đề này.';
+        $('empty').classList.remove('hidden');
+      } else {
+        $('empty').classList.add('hidden');
+        hideSummary();
+        $('quiz').classList.remove('hidden');
+        renderQuestion();
+      }
+    });
+
     document.querySelectorAll('.lang-toggle button').forEach((btn) => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.lang-toggle button').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
         langMode = btn.dataset.mode;
-        if (questions.length > 0) renderQuestion();
+        applyLangModeUI();
+        populateTopicFilter();
+        saveProgress();
+        if (filteredQuestions.length > 0) renderQuestion();
       });
     });
 
     $('checkBtn').addEventListener('click', checkAnswer);
     $('nextBtn').addEventListener('click', nextQuestion);
+    $('resetBtn').addEventListener('click', resetProgress);
+    $('restartBtn').addEventListener('click', restartSession);
+    $('continueBtn').addEventListener('click', () => {
+      hideSummary();
+      $('quiz').classList.remove('hidden');
+      $('topicFilter').focus();
+    });
+    $('dismissResume').addEventListener('click', () => {
+      $('resumeBanner').classList.add('hidden');
+    });
 
+    loadProgress();
     initSupabase();
     loadQuestions();
   </script>
