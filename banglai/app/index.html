@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Học Lái Xe Ba Lan</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .container { max-width: 100%; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { text-align: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; position: relative; }
+        .header h1 { font-size: 1.5rem; color: var(--primary); margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+        .lang-switcher { position: absolute; top: 16px; right: 0; display: flex; gap: 8px; }
+        .lang-switch { padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
+        .lang-switch.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
+        .nav-tab {
+            flex: 1; min-width: 100px; padding: 12px 16px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; color: var(--text-secondary);
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s; text-align: center; white-space: nowrap;
+        }
+        .nav-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .nav-tab:hover:not(.active) { border-color: var(--primary); color: var(--text-primary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .section { display: none; flex-direction: column; flex: 1; min-height: 0; }
+        .section.active { display: flex; }
+        .card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .card-title { font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary); }
+        .progress-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat-card { background: var(--bg-dark); border-radius: 8px; padding: 16px; text-align: center; }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+        .progress-bar { height: 8px; background: var(--bg-dark); border-radius: 4px; overflow: hidden; margin-top: 16px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 4px; transition: width 0.3s; }
+        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+        .lesson-counter { font-size: 0.9rem; color: var(--text-secondary); }
+        .question-box { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+        .question-type { display: inline-block; padding: 4px 12px; background: var(--primary); border-radius: 20px; font-size: 0.75rem; margin-bottom: 12px; text-transform: uppercase; }
+        .question-type.basic { background: #3b82f6; }
+        .question-type.special { background: #8b5cf6; }
+        .question-text { font-size: 1.1rem; line-height: 1.7; margin-bottom: 16px; white-space: pre-wrap; }
+        .question-image { max-width: 100%; border-radius: 8px; margin-bottom: 16px; }
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--bg-dark); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+        .option:hover:not(.disabled) { border-color: var(--primary); }
+        .option.selected { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
+        .option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
+        .option.incorrect { border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+        .option.disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-letter { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--bg-card); border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .option.selected .option-letter { background: var(--primary); color: white; }
+        .option.correct .option-letter { background: var(--success); color: white; }
+        .option.incorrect .option-letter { background: var(--danger); color: white; }
+        .option-text { flex: 1; padding-top: 4px; font-size: 1rem; white-space: pre-wrap; }
+        .btn { padding: 14px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
+        .btn-group { display: flex; gap: 12px; margin-top: 16px; }
+        .btn-group .btn { flex: 1; }
+        .explanation { margin-top: 16px; padding: 16px; background: rgba(37, 99, 235, 0.1); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; }
+        .explanation-title { font-weight: 600; color: var(--primary); margin-bottom: 8px; }
+        .timer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: var(--bg-card); border-radius: 8px; margin-bottom: 16px; }
+        .timer-value { font-size: 1.5rem; font-weight: 700; font-family: monospace; }
+        .timer-value.warning { color: var(--warning); }
+        .timer-value.danger { color: var(--danger); animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .result-card { text-align: center; padding: 32px 16px; }
+        .result-score { font-size: 4rem; font-weight: 700; margin-bottom: 8px; }
+        .result-score.pass { color: var(--success); }
+        .result-score.fail { color: var(--danger); }
+        .result-status { font-size: 1.2rem; margin-bottom: 24px; }
+        .result-details { text-align: left; margin-bottom: 24px; }
+        .result-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; text-align: center; }
+        .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .quiz-start { text-align: center; padding: 24px; }
+        .quiz-info { background: var(--bg-card); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: left; }
+        .quiz-info h3 { margin-bottom: 12px; color: var(--primary); }
+        .quiz-info ul { list-style: none; padding: 0; }
+        .quiz-info li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .quiz-info li:last-child { border-bottom: none; }
+        .question-dots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; max-height: 150px; overflow-y: auto; }
+        .dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; background: var(--bg-dark); border: 2px solid var(--border); color: var(--text-secondary); flex-shrink: 0; }
+        .dot.answered { background: var(--success); border-color: var(--success); color: white; }
+        .dot.current { background: var(--primary); border-color: var(--primary); color: white; }
+        .dot.wrong { background: var(--danger); border-color: var(--danger); color: white; }
+        .quiz-timer-info { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; padding: 0 4px; }
+        .settings-section { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+        .setting-input { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); width: 100%; font-size: 0.85rem; margin-bottom: 12px; }
+        .setting-input:focus { outline: none; border-color: var(--primary); }
+        @media (max-width: 480px) {
+            .container { padding: 12px; }
+            .header h1 { font-size: 1.3rem; }
+            .progress-stats { grid-template-columns: 1fr; }
+            .btn-group { flex-direction: column; }
+            .question-text { font-size: 1rem; }
+            .lang-switcher { position: static; justify-content: center; margin-top: 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🇵🇱 <span data-text="title">Học Lái Xe Ba Lan</span></h1>
+            <p class="header-subtitle" data-text="subtitle">Bài thi lý thuyết</p>
+            <div class="lang-switcher">
+                <button class="lang-switch" data-lang="vi" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
+                <button class="lang-switch" data-lang="pl" onclick="switchLanguage('pl')">🇵🇱 Polski</button>
+                <button class="lang-switch active" data-lang="bilingual" onclick="switchLanguage('bilingual')">🌐 Song ngữ</button>
+            </div>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-tab="lesson" data-text="nav_lesson">📖 Bài học</button>
+            <button class="nav-tab" data-tab="quiz" data-text="nav_quiz">📝 Thi thử</button>
+            <button class="nav-tab" data-tab="progress" data-text="nav_progress">📊 Tiến độ</button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Lesson Section -->
+            <section id="lesson" class="section active">
+                <div class="lesson-header">
+                    <span class="lesson-counter"><span data-text="question_label">Câu</span> <span id="lesson-current">1</span> / <span id="lesson-total">0</span></span>
+                </div>
+
+                <div id="lesson-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p data-text="loading">Đang tải câu hỏi...</p>
+                </div>
+
+                <div id="lesson-content" style="display: none;">
+                    <div class="question-box">
+                        <span id="question-type" class="question-type basic" data-text="type_basic">Cơ bản</span>
+                        <img id="question-image" class="question-image" style="display: none;">
+                        <p id="question-text" class="question-text"></p>
+                        <div class="options" id="lesson-options"></div>
+                        <div id="lesson-explanation" class="explanation" style="display: none;">
+                            <div class="explanation-title" data-text="explanation_title">Giải thích:</div>
+                            <p id="explanation-text"></p>
+                        </div>
+                    </div>
+                    <div class="btn-group">
+                        <button id="btn-check" class="btn btn-primary" onclick="checkAnswer()" data-text="btn_check">Kiểm tra</button>
+                        <button id="btn-next" class="btn btn-success" onclick="nextQuestion()" style="display: none;" data-text="btn_next">Câu tiếp theo →</button>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-secondary" onclick="prevLessonQuestion()" data-text="btn_prev">← Câu trước</button>
+                        <button class="btn btn-secondary" onclick="shuffleQuestions()">🔀 <span data-text="btn_shuffle">Xáo trộn</span></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quiz Section -->
+            <section id="quiz" class="section">
+                <div id="quiz-start" class="quiz-start">
+                    <h2 style="margin-bottom: 16px;" data-text="quiz_title">Bài Thi Thử</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;" data-text="quiz_info">32 câu hỏi trong 25 phút<br><span data-text="quiz_pass">Điểm đạt: 68/74</span></p>
+                    <div class="quiz-info">
+                        <h3 data-text="quiz_structure_title">Cấu trúc bài thi:</h3>
+                        <ul>
+                            <li><span data-text="quiz_basic">📚 20 câu cơ bản (Đ/S)</span><span style="color: var(--primary);">44 điểm</span></li>
+                            <li><span data-text="quiz_special">⚙️ 12 câu chuyên ngành (A/B/C)</span><span style="color: var(--primary);">30 điểm</span></li>
+                            <li><span>⏱️ 25 phút</span><span style="color: var(--success);" data-text="quiz_pass_info">68+ để đạt</span></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-primary" onclick="startQuiz()" style="max-width: 300px; margin: 0 auto;">🚗 <span data-text="quiz_start">Bắt đầu thi</span></button>
+                </div>
+
+                <div id="quiz-content" style="display: none;">
+                    <div class="quiz-timer-info">
+                        <span><span data-text="quiz_total">Tổng:</span> <span id="total-time">25:00</span></span>
+                        <span><span data-text="quiz_question_time">Câu:</span> <span id="question-time">00:35</span></span>
+                    </div>
+                    <div class="timer">
+                        <span>⏱️</span>
+                        <span id="quiz-timer" class="timer-value">25:00</span>
+                    </div>
+                    <div class="question-dots" id="quiz-dots"></div>
+                    <div class="question-box">
+                        <span id="quiz-question-type" class="question-type basic" data-text="type_basic">Cơ bản</span>
+                        <span id="quiz-question-points" style="float: right; color: var(--primary); font-weight: 600;"></span>
+                        <img id="quiz-question-image" class="question-image" style="display: none;">
+                        <p id="quiz-question-text" class="question-text"></p>
+                        <div class="options" id="quiz-options"></div>
+                    </div>
+                    <div class="btn-group">
+                        <button id="btn-quiz-next" class="btn btn-primary" onclick="nextQuizQuestion()" disabled data-text="quiz_next">Câu tiếp theo →</button>
+                    </div>
+                    <div style="margin-top: 16px; text-align: center; color: var(--text-secondary);"><span data-text="quiz_progress">Câu</span> <span id="quiz-current">1</span> / 32</div>
+                </div>
+
+                <div id="quiz-result" class="result-card" style="display: none;">
+                    <h2 style="margin-bottom: 24px;" data-text="result_title">Kết quả bài thi</h2>
+                    <div class="result-score" id="result-score">0</div>
+                    <div class="result-status" id="result-status">Chưa hoàn thành</div>
+                    <div class="result-details">
+                        <div class="result-item"><span data-text="result_total">Tổng điểm</span><span id="result-total">0 / 74</span></div>
+                        <div class="result-item"><span data-text="result_pass">Điểm đạt</span><span>68</span></div>
+                        <div class="result-item"><span data-text="result_correct">Câu đúng</span><span id="result-correct">0 / 32</span></div>
+                        <div class="result-item"><span data-text="result_time">Thời gian</span><span id="result-time">--:--</span></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="restartQuiz()" style="max-width: 200px; margin: 0 auto;" data-text="result_retry">Làm lại</button>
+                </div>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progress" class="section">
+                <div class="card">
+                    <h2 class="card-title" data-text="progress_title">Tiến độ học tập</h2>
+                    <div class="progress-stats">
+                        <div class="stat-card"><div class="stat-value" id="progress-total">0</div><div class="stat-label" data-text="progress_total">Tổng câu hỏi</div></div>
+                        <div class="stat-card"><div class="stat-value" id="progress-answered">0</div><div class="stat-label" data-text="progress_answered">Đã trả lời</div></div>
+                        <div class="stat-card"><div class="stat-value" id="progress-correct">0%</div><div class="stat-label" data-text="progress_correct">Tỷ lệ đúng</div></div>
+                        <div class="stat-card"><div class="stat-value" id="progress-best">0 điểm</div><div class="stat-label" data-text="progress_best">Điểm cao nhất</div></div>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%;"></div></div>
+                    <p style="text-align: center; margin-top: 8px; color: var(--text-secondary); font-size: 0.85rem;"><span id="progress-percent">0</span>% <span data-text="progress_complete">hoàn thành</span></p>
+                </div>
+                <div class="card">
+                    <h2 class="card-title" data-text="progress_detail_title">Thống kê chi tiết</h2>
+                    <div class="result-details">
+                        <div class="result-item"><span data-text="progress_basic">Câu cơ bản đã học</span><span id="stat-basic-learned">0 / 20</span></div>
+                        <div class="result-item"><span data-text="progress_special">Câu chuyên ngành đã học</span><span id="stat-special-learned">0 / 12</span></div>
+                        <div class="result-item"><span data-text="progress_quiz_count">Số lần thi</span><span id="stat-quiz-count">0</span></div>
+                        <div class="result-item"><span data-text="progress_last_date">Ngày học gần nhất</span><span id="stat-last-date">--</span></div>
+                    </div>
+                </div>
+                <button class="btn btn-secondary" onclick="resetProgress()">🗑️ <span data-text="progress_reset">Xóa tiến độ</span></button>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            vi: {
+                title: 'Học Lái Xe Ba Lan',
+                subtitle: 'Bài thi lý thuyết',
+                nav_lesson: '📖 Bài học',
+                nav_quiz: '📝 Thi thử',
+                nav_progress: '📊 Tiến độ',
+                question_label: 'Câu',
+                loading: 'Đang tải câu hỏi...',
+                type_basic: 'Cơ bản',
+                type_special: 'Chuyên ngành',
+                explanation_title: 'Giải thích:',
+                btn_check: 'Kiểm tra',
+                btn_next: 'Câu tiếp theo →',
+                btn_prev: '← Câu trước',
+                btn_shuffle: 'Xáo trộn',
+                quiz_title: 'Bài Thi Thử',
+                quiz_info: '32 câu hỏi trong 25 phút<br><span>Điểm đạt: 68/74</span>',
+                quiz_pass: 'Điểm đạt: 68/74',
+                quiz_structure_title: 'Cấu trúc bài thi:',
+                quiz_basic: '📚 20 câu cơ bản (Đ/S)',
+                quiz_special: '⚙️ 12 câu chuyên ngành (A/B/C)',
+                quiz_pass_info: '68+ để đạt',
+                quiz_start: 'Bắt đầu thi',
+                quiz_total: 'Tổng:',
+                quiz_question_time: 'Câu:',
+                quiz_next: 'Câu tiếp theo →',
+                quiz_progress: 'Câu',
+                quiz_result: 'Xem kết quả ✓',
+                result_title: 'Kết quả bài thi',
+                result_total: 'Tổng điểm',
+                result_pass: 'Điểm đạt',
+                result_correct: 'Câu đúng',
+                result_time: 'Thời gian',
+                result_retry: 'Làm lại',
+                progress_title: 'Tiến độ học tập',
+                progress_total: 'Tổng câu hỏi',
+                progress_answered: 'Đã trả lời',
+                progress_correct: 'Tỷ lệ đúng',
+                progress_best: 'Điểm cao nhất',
+                progress_complete: 'hoàn thành',
+                progress_detail_title: 'Thống kê chi tiết',
+                progress_basic: 'Câu cơ bản đã học',
+                progress_special: 'Câu chuyên ngành đã học',
+                progress_quiz_count: 'Số lần thi',
+                progress_last_date: 'Ngày học gần nhất',
+                progress_reset: 'Xóa tiến độ',
+                alert_need_questions: 'Cần ít nhất 32 câu hỏi. Hiện tại: ',
+                alert_no_questions: 'Chưa có câu hỏi. Vui lòng thêm dữ liệu vào Supabase.',
+                alert_completed: 'Bạn đã hoàn thành tất cả câu hỏi!',
+                alert_reset_progress: 'Xóa toàn bộ tiến độ?',
+                alert_need_more: ' câu.'
+            },
+            bilingual: {
+                title: '🇵🇱🇻🇳 Học Lái Xe - Bilingual',
+                subtitle: 'Theory exam',
+                nav_lesson: '📖 Lesson',
+                nav_quiz: '📝 Quiz',
+                nav_progress: '📊 Progress',
+                question_label: 'Question',
+                loading: 'Loading questions...',
+                type_basic: 'Basic',
+                type_special: 'Specialist',
+                explanation_title: 'Explanation:',
+                btn_check: 'Check',
+                btn_next: 'Next →',
+                btn_prev: '← Previous',
+                btn_shuffle: '🔀 Shuffle',
+                quiz_title: 'Practice Exam',
+                quiz_info: '32 questions in 25 minutes<br><span>Pass score: 68/74</span>',
+                quiz_pass: 'Pass score: 68/74',
+                quiz_structure_title: 'Exam structure:',
+                quiz_basic: '📚 20 basic questions (T/F)',
+                quiz_special: '⚙️ 12 specialist questions (A/B/C)',
+                quiz_pass_info: '68+ to pass',
+                quiz_start: 'Start exam',
+                quiz_total: 'Total:',
+                quiz_question_time: 'Q:',
+                quiz_next: 'Next question →',
+                quiz_progress: 'Question',
+                quiz_result: 'See results ✓',
+                result_title: 'Exam Results',
+                result_total: 'Total score',
+                result_pass: 'Pass score',
+                result_correct: 'Correct answers',
+                result_time: 'Time',
+                result_retry: 'Try again',
+                progress_title: 'Learning Progress',
+                progress_total: 'Total questions',
+                progress_answered: 'Answered',
+                progress_correct: 'Correct rate',
+                progress_best: 'Best score',
+                progress_complete: 'completed',
+                progress_detail_title: 'Detailed Statistics',
+                progress_basic: 'Basic questions learned',
+                progress_special: 'Specialist questions learned',
+                progress_quiz_count: 'Exam attempts',
+                progress_last_date: 'Last study',
+                progress_reset: 'Reset progress',
+                alert_need_questions: 'Need at least 32 questions. Currently: ',
+                alert_no_questions: 'No questions. Please add data to Supabase.',
+                alert_completed: 'You completed all questions!',
+                alert_reset_progress: 'Delete all progress?',
+                alert_need_more: ' questions.'
+            },
+            pl: {
+                title: 'Nauka Jazdy - Polska',
+                subtitle: 'Egamin teoretyczny',
+                nav_lesson: '📖 Lekcja',
+                nav_quiz: '📝 Test',
+                nav_progress: '📊 Postęp',
+                question_label: 'Pytanie',
+                loading: 'Ładowanie pytań...',
+                type_basic: 'Podstawowe',
+                type_special: 'Specjalistyczne',
+                explanation_title: 'Wyjaśnienie:',
+                btn_check: 'Sprawdź',
+                btn_next: 'Następne pytanie →',
+                btn_prev: '← Poprzednie',
+                btn_shuffle: 'Losuj',
+                quiz_title: 'Próbny Egzamin',
+                quiz_info: '32 pytania w 25 minut<br><span>Wynik do zaliczenia: 68/74</span>',
+                quiz_pass: 'Wynik do zaliczenia: 68/74',
+                quiz_structure_title: 'Struktura egzaminu:',
+                quiz_basic: '📚 20 pytań podstawowych (T/N)',
+                quiz_special: '⚙️ 12 pytań specjalistycznych (A/B/C)',
+                quiz_pass_info: '68+ do zaliczenia',
+                quiz_start: 'Rozpocznij egzamin',
+                quiz_total: 'Razem:',
+                quiz_question_time: 'Pytanie:',
+                quiz_next: 'Następne pytanie →',
+                quiz_progress: 'Pytanie',
+                quiz_result: 'Zobacz wyniki ✓',
+                result_title: 'Wynik egzaminu',
+                result_total: 'Wynik całkowity',
+                result_pass: 'Wynik zaliczeniowy',
+                result_correct: 'Poprawne odpowiedzi',
+                result_time: 'Czas',
+                result_retry: 'Spróbuj ponownie',
+                progress_title: 'Postęp nauki',
+                progress_total: 'Wszystkie pytania',
+                progress_answered: 'Odpowiedziano',
+                progress_correct: 'Wynik poprawny',
+                progress_best: 'Najlepszy wynik',
+                progress_complete: 'ukończono',
+                progress_detail_title: 'Statystyki szczegółowe',
+                progress_basic: 'Pytania podstawowe',
+                progress_special: 'Pytania specjalistyczne',
+                progress_quiz_count: 'Liczba egzaminów',
+                progress_last_date: 'Ostatnia nauka',
+                progress_reset: 'Reset postępu',
+                alert_need_questions: 'Potrzeba co najmniej 32 pytań. Aktualnie: ',
+                alert_no_questions: 'Brak pytań. Dodaj dane do Supabase.',
+                alert_completed: 'Ukończyłeś wszystkie pytania!',
+                alert_reset_progress: 'Usunąć cały postęp?',
+                alert_need_more: ' pytań.'
+            }
+        };
+
+        // State
+        let sbClient = null;
+        let questions = [];
+        let currentLessonIndex = 0;
+        let currentQuizIndex = 0;
+        let quizQuestions = [];
+        let quizAnswers = [];
+        let quizStartTime = null;
+        let totalTimer = null;
+        let questionTimer = null;
+        let selectedOption = null;
+        let answerChecked = false;
+        let currentLang = 'vi';
+        let viewMode = 'bilingual';
+
+        // Progress
+        let progress = {
+            totalQuestions: 0,
+            answeredQuestions: [],
+            correctAnswers: [],
+            quizBestScore: 0,
+            quizCount: 0,
+            lastStudyDate: null,
+            basicLearned: 0,
+            specialLearned: 0
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgress();
+            loadSettings();
+            initNavigation();
+            switchLanguage('bilingual');
+        });
+
+        // Language switching
+        function switchLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('app_lang', lang);
+            
+            document.querySelectorAll('.lang-switch').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+            });
+            
+            const t = translations[lang];
+            
+            // Update header
+            document.querySelector('[data-text="title"]').textContent = t.title;
+            document.querySelector('[data-text="subtitle"]').textContent = t.subtitle;
+            
+            // Update nav tabs
+            document.querySelector('[data-text="nav_lesson"]').textContent = t.nav_lesson;
+            document.querySelector('[data-text="nav_quiz"]').textContent = t.nav_quiz;
+            document.querySelector('[data-text="nav_progress"]').textContent = t.nav_progress;
+            
+            // Update lesson
+            document.querySelector('[data-text="question_label"]').textContent = t.question_label;
+            document.querySelector('[data-text="loading"]').textContent = t.loading;
+            document.querySelector('[data-text="type_basic"]').textContent = t.type_basic;
+            document.querySelector('[data-text="explanation_title"]').textContent = t.explanation_title;
+            document.querySelector('[data-text="btn_check"]').textContent = t.btn_check;
+            document.querySelector('[data-text="btn_next"]').textContent = t.btn_next;
+            document.querySelector('[data-text="btn_prev"]').textContent = t.btn_prev;
+            document.querySelector('[data-text="btn_shuffle"]').textContent = t.btn_shuffle;
+            
+            // Update quiz
+            document.querySelector('[data-text="quiz_title"]').textContent = t.quiz_title;
+            document.querySelector('[data-text="quiz_pass"]').innerHTML = t.quiz_pass;
+            document.querySelector('[data-text="quiz_structure_title"]').textContent = t.quiz_structure_title;
+            document.querySelector('[data-text="quiz_basic"]').textContent = t.quiz_basic;
+            document.querySelector('[data-text="quiz_special"]').textContent = t.quiz_special;
+            document.querySelector('[data-text="quiz_pass_info"]').textContent = t.quiz_pass_info;
+            document.querySelector('[data-text="quiz_start"]').textContent = t.quiz_start;
+            document.querySelector('[data-text="quiz_total"]').textContent = t.quiz_total;
+            document.querySelector('[data-text="quiz_question_time"]').textContent = t.quiz_question_time;
+            document.querySelector('[data-text="quiz_next"]').textContent = t.quiz_next;
+            document.querySelector('[data-text="quiz_progress"]').textContent = t.quiz_progress;
+            document.querySelector('[data-text="result_title"]').textContent = t.result_title;
+            document.querySelector('[data-text="result_total"]').textContent = t.result_total;
+            document.querySelector('[data-text="result_pass"]').textContent = t.result_pass;
+            document.querySelector('[data-text="result_correct"]').textContent = t.result_correct;
+            document.querySelector('[data-text="result_time"]').textContent = t.result_time;
+            document.querySelector('[data-text="result_retry"]').textContent = t.result_retry;
+            
+            // Update progress
+            document.querySelector('[data-text="progress_title"]').textContent = t.progress_title;
+            document.querySelector('[data-text="progress_total"]').textContent = t.progress_total;
+            document.querySelector('[data-text="progress_answered"]').textContent = t.progress_answered;
+            document.querySelector('[data-text="progress_correct"]').textContent = t.progress_correct;
+            document.querySelector('[data-text="progress_best"]').textContent = t.progress_best;
+            document.querySelector('[data-text="progress_complete"]').textContent = t.progress_complete;
+            document.querySelector('[data-text="progress_detail_title"]').textContent = t.progress_detail_title;
+            document.querySelector('[data-text="progress_basic"]').textContent = t.progress_basic;
+            document.querySelector('[data-text="progress_special"]').textContent = t.progress_special;
+            document.querySelector('[data-text="progress_quiz_count"]').textContent = t.progress_quiz_count;
+            document.querySelector('[data-text="progress_last_date"]').textContent = t.progress_last_date;
+            document.querySelector('[data-text="progress_reset"]').textContent = t.progress_reset;
+            
+            // Update view mode for questions (bilingual shows both languages)
+            viewMode = lang;
+            if (questions.length > 0) {
+                displayLessonQuestion();
+            }
+            
+            updateProgressStats();
+        }
+
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'progress') updateProgressStats();
+        }
+
+        // Supabase Connection
+        function connectSupabase() {
+            const url = document.getElementById('supabase-url').value.trim();
+            const key = document.getElementById('supabase-key').value.trim();
+            
+            if (!url || !key) {
+                document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Vui lòng nhập đầy đủ URL và Key</span>';
+                return;
+            }
+
+            document.getElementById('connection-status').innerHTML = '<span style="color: var(--warning);">Đang kết nối...</span>';
+
+            try {
+                sbClient = supabase.createClient(url, key);
+                sbClient.from('questions').select('count').limit(1)
+                    .then(response => {
+                        if (response.error) {
+                            document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Lỗi: ' + response.error.message + '</span>';
+                        } else {
+                            document.getElementById('connection-status').innerHTML = '<span style="color: var(--success);">✓ Kết nối thành công!</span>';
+                            saveSettings(url, key);
+                            loadQuestions();
+                        }
+                    });
+            } catch (err) {
+                document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Lỗi: ' + err.message + '</span>';
+            }
+        }
+
+        // Load Questions
+        async function loadQuestions() {
+            if (!sbClient) return;
+
+            document.getElementById('lesson-loading').style.display = 'flex';
+            document.getElementById('lesson-content').style.display = 'none';
+
+            try {
+                const { data, error } = await sbClient.from('questions').select('*').order('id');
+                if (error) throw error;
+
+                questions = data;
+                progress.totalQuestions = questions.length;
+                saveProgress();
+                updateProgressStats();
+                
+                if (questions.length > 0) {
+                    document.getElementById('lesson-loading').style.display = 'none';
+                    document.getElementById('lesson-content').style.display = 'block';
+                    displayLessonQuestion();
+                } else {
+                    document.getElementById('lesson-loading').innerHTML = '<p>' + translations[currentLang].alert_no_questions + '</p>';
+                }
+            } catch (err) {
+                document.getElementById('lesson-loading').innerHTML = '<p style="color: var(--danger);">Lỗi: ' + err.message + '</p>';
+            }
+        }
+
+        // Display Lesson Question
+        function displayLessonQuestion() {
+            if (questions.length === 0) return;
+
+            const q = questions[currentLessonIndex];
+            document.getElementById('lesson-current').textContent = currentLessonIndex + 1;
+            document.getElementById('lesson-total').textContent = questions.length;
+            
+            const typeEl = document.getElementById('question-type');
+            typeEl.textContent = q.question_type === 'special' ? translations[currentLang].type_special : translations[currentLang].type_basic;
+            typeEl.className = 'question-type ' + (q.question_type === 'special' ? 'special' : 'basic');
+            
+            document.getElementById('question-text').textContent = getQuestionText(q);
+            
+            const imgEl = document.getElementById('question-image');
+            if (q.image_url) { imgEl.src = q.image_url; imgEl.style.display = 'block'; }
+            else { imgEl.style.display = 'none'; }
+            
+            const optionsContainer = document.getElementById('lesson-options');
+            optionsContainer.innerHTML = '';
+            ['A', 'B', 'C'].forEach((letter, idx) => {
+                const key = ['option_a', 'option_b', 'option_c'][idx];
+                if (q[key + '_pl'] || q[key + '_vi']) {
+                    const div = document.createElement('div');
+                    div.className = 'option';
+                    div.innerHTML = `<span class="option-letter">${letter}</span><span class="option-text">${getOptionText(q, key)}</span>`;
+                    div.addEventListener('click', () => selectLessonOption(div, letter));
+                    optionsContainer.appendChild(div);
+                }
+            });
+            
+            selectedOption = null;
+            answerChecked = false;
+            document.getElementById('btn-check').style.display = 'block';
+            document.getElementById('btn-check').disabled = true;
+            document.getElementById('btn-next').style.display = 'none';
+            document.getElementById('lesson-explanation').style.display = 'none';
+        }
+
+        function getQuestionText(q) {
+            if (viewMode === 'polish') return q.question_pl || q.question_vi;
+            if (viewMode === 'vietnamese') return q.question_vi || q.question_pl;
+            // Bilingual mode - show both
+            if (q.question_pl && q.question_vi) return q.question_pl + '\n\n' + q.question_vi;
+            return q.question_pl || q.question_vi || '';
+        }
+
+        function getOptionText(q, key) {
+            const pl = q[key + '_pl'] || '';
+            const vi = q[key + '_vi'] || '';
+            if (viewMode === 'polish') return pl || vi;
+            if (viewMode === 'vietnamese') return vi || pl;
+            // Bilingual mode - show both
+            if (pl && vi) return pl + '\n' + vi;
+            return pl || vi;
+        }
+
+        function selectLessonOption(element, letter) {
+            if (answerChecked) return;
+            document.querySelectorAll('#lesson-options .option').forEach(o => o.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOption = letter;
+            document.getElementById('btn-check').disabled = false;
+        }
+
+        function checkAnswer() {
+            if (!selectedOption || answerChecked) return;
+            const q = questions[currentLessonIndex];
+            const isCorrect = selectedOption === q.correct_answer;
+            answerChecked = true;
+            
+            document.querySelectorAll('#lesson-options .option').forEach(o => {
+                o.classList.add('disabled');
+                if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
+                else if (o.classList.contains('selected') && !isCorrect) o.classList.add('incorrect');
+            });
+            
+            if (!progress.answeredQuestions.includes(q.id)) {
+                progress.answeredQuestions.push(q.id);
+                if (isCorrect) progress.correctAnswers.push(q.id);
+                if (q.question_type === 'basic') progress.basicLearned++;
+                else progress.specialLearned++;
+                progress.lastStudyDate = new Date().toISOString();
+                saveProgress();
+                updateProgressStats();
+            }
+            
+            document.getElementById('lesson-explanation').style.display = 'block';
+            document.getElementById('explanation-text').textContent = q.explanation_vi || 'Không có giải thích.';
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-next').style.display = 'block';
+            document.getElementById('btn-next').textContent = currentLessonIndex < questions.length - 1 ? translations[currentLang].btn_next : '✓ ' + (currentLang === 'vi' ? 'Hoàn thành' : 'Ukończono');
+        }
+
+        function nextQuestion() {
+            if (currentLessonIndex < questions.length - 1) { currentLessonIndex++; displayLessonQuestion(); }
+            else alert(translations[currentLang].alert_completed);
+        }
+
+        function prevLessonQuestion() {
+            if (currentLessonIndex > 0) { currentLessonIndex--; displayLessonQuestion(); }
+        }
+
+        function shuffleQuestions() {
+            questions = [...questions].sort(() => Math.random() - 0.5);
+            currentLessonIndex = 0;
+            displayLessonQuestion();
+        }
+
+        // Quiz Functions
+        function startQuiz() {
+            if (questions.length < 32) {
+                alert(translations[currentLang].alert_need_questions + questions.length + translations[currentLang].alert_need_more);
+                return;
+            }
+
+            const basicQs = questions.filter(q => q.question_type === 'basic').sort(() => Math.random() - 0.5);
+            const specialQs = questions.filter(q => q.question_type === 'special').sort(() => Math.random() - 0.5);
+            
+            quizQuestions = [...basicQs.slice(0, 20), ...specialQs.slice(0, 12)];
+            assignQuizPoints();
+            quizQuestions = quizQuestions.sort(() => Math.random() - 0.5);
+            
+            quizAnswers = new Array(32).fill(null);
+            currentQuizIndex = 0;
+            quizStartTime = Date.now();
+            
+            const dotsContainer = document.getElementById('quiz-dots');
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < 32; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.textContent = i + 1;
+                dotsContainer.appendChild(dot);
+            }
+            
+            document.getElementById('quiz-start').style.display = 'none';
+            document.getElementById('quiz-content').style.display = 'block';
+            document.getElementById('quiz-result').style.display = 'none';
+            
+            displayQuizQuestion();
+            startTotalTimer();
+            startQuestionTimer();
+        }
+
+        function assignQuizPoints() {
+            const basicPoints = [3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,1,1,1,1].sort(() => Math.random() - 0.5);
+            const specialPoints = [3,3,3,3,3,3,2,2,2,2,1,1].sort(() => Math.random() - 0.5);
+            
+            quizQuestions.slice(0, 20).forEach((q, i) => q.points = basicPoints[i] || 3);
+            quizQuestions.slice(20, 32).forEach((q, i) => q.points = specialPoints[i] || 3);
+        }
+
+        function displayQuizQuestion() {
+            const q = quizQuestions[currentQuizIndex];
+            
+            document.querySelectorAll('#quiz-dots .dot').forEach((dot, idx) => {
+                dot.classList.remove('current', 'answered', 'wrong');
+                if (idx === currentQuizIndex) dot.classList.add('current');
+                else if (quizAnswers[idx] !== null) dot.classList.add(quizAnswers[idx].correct ? 'answered' : 'wrong');
+            });
+            
+            const typeEl = document.getElementById('quiz-question-type');
+            typeEl.textContent = q.question_type === 'special' ? translations[currentLang].type_special : translations[currentLang].type_basic;
+            typeEl.className = 'question-type ' + (q.question_type === 'special' ? 'special' : 'basic');
+            document.getElementById('quiz-question-points').textContent = (q.points || 3) + ' ' + (currentLang === 'vi' ? 'điểm' : 'pkt');
+            document.getElementById('quiz-question-text').textContent = getQuestionText(q);
+            
+            const imgEl = document.getElementById('quiz-question-image');
+            if (q.image_url) { imgEl.src = q.image_url; imgEl.style.display = 'block'; }
+            else { imgEl.style.display = 'none'; }
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            ['A', 'B', 'C'].forEach((letter, idx) => {
+                const key = ['option_a', 'option_b', 'option_c'][idx];
+                if (q[key + '_pl'] || q[key + '_vi']) {
+                    const div = document.createElement('div');
+                    div.className = 'option';
+                    div.innerHTML = `<span class="option-letter">${letter}</span><span class="option-text">${getOptionText(q, key)}</span>`;
+                    div.addEventListener('click', () => selectQuizOption(div, letter));
+                    optionsContainer.appendChild(div);
+                }
+            });
+            
+            document.getElementById('quiz-current').textContent = currentQuizIndex + 1;
+            document.getElementById('btn-quiz-next').disabled = quizAnswers[currentQuizIndex] === null;
+            document.getElementById('btn-quiz-next').textContent = currentQuizIndex < 31 ? translations[currentLang].quiz_next : translations[currentLang].quiz_result;
+        }
+
+        function selectQuizOption(element, letter) {
+            if (quizAnswers[currentQuizIndex] !== null) return;
+            clearInterval(questionTimer);
+            
+            document.querySelectorAll('#quiz-options .option').forEach(o => o.classList.add('disabled'));
+            element.classList.add('selected');
+            
+            const q = quizQuestions[currentQuizIndex];
+            const isCorrect = letter === q.correct_answer;
+            const points = q.points || 3;
+            
+            quizAnswers[currentQuizIndex] = { selected: letter, correct: isCorrect, points: isCorrect ? points : 0 };
+            element.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            if (!isCorrect) {
+                document.querySelectorAll('#quiz-options .option').forEach(o => {
+                    if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
+                });
+            }
+            
+            document.getElementById('btn-quiz-next').disabled = false;
+        }
+
+        function nextQuizQuestion() {
+            if (currentQuizIndex < 31) { currentQuizIndex++; displayQuizQuestion(); startQuestionTimer(); }
+            else finishQuiz();
+        }
+
+        function startTotalTimer() {
+            let timeLeft = 25 * 60;
+            updateTotalTimerDisplay(timeLeft);
+            totalTimer = setInterval(() => {
+                timeLeft--;
+                updateTotalTimerDisplay(timeLeft);
+                if (timeLeft <= 0) { clearInterval(totalTimer); finishQuiz(); }
+            }, 1000);
+        }
+
+        function updateTotalTimerDisplay(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            const display = `${m}:${s}`;
+            const timerEl = document.getElementById('quiz-timer');
+            timerEl.textContent = display;
+            document.getElementById('total-time').textContent = display;
+            timerEl.classList.remove('warning', 'danger');
+            if (seconds <= 60) timerEl.classList.add('danger');
+            else if (seconds <= 180) timerEl.classList.add('warning');
+        }
+
+        function startQuestionTimer() {
+            const q = quizQuestions[currentQuizIndex];
+            currentQuestionTime = q.question_type === 'special' ? 50 : 35;
+            updateQuestionTimerDisplay(currentQuestionTime);
+            questionTimer = setInterval(() => {
+                currentQuestionTime--;
+                updateQuestionTimerDisplay(currentQuestionTime);
+                if (currentQuestionTime <= 0) { clearInterval(questionTimer); questionTimeout(); }
+            }, 1000);
+        }
+
+        function updateQuestionTimerDisplay(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            const display = `${m}:${s}`;
+            document.getElementById('question-time').textContent = display;
+            const el = document.getElementById('question-time');
+            el.style.color = seconds <= 5 ? 'var(--danger)' : (seconds <= 10 ? 'var(--warning)' : 'var(--text-secondary)');
+        }
+
+        function questionTimeout() {
+            if (quizAnswers[currentQuizIndex] === null) {
+                const q = quizQuestions[currentQuizIndex];
+                quizAnswers[currentQuizIndex] = { selected: null, correct: false, points: 0, skipped: true };
+                document.querySelectorAll('#quiz-options .option').forEach(o => {
+                    o.classList.add('disabled');
+                    if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
+                });
+                document.getElementById('btn-quiz-next').disabled = false;
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(totalTimer);
+            clearInterval(questionTimer);
+            
+            let totalPoints = 0, correctCount = 0;
+            quizQuestions.forEach((q, idx) => {
+                if (quizAnswers[idx]?.correct) { totalPoints += quizAnswers[idx].points; correctCount++; }
+            });
+            
+            const passed = totalPoints >= 68;
+            progress.quizCount++;
+            if (totalPoints > progress.quizBestScore) progress.quizBestScore = totalPoints;
+            progress.lastStudyDate = new Date().toISOString();
+            saveProgress();
+            updateProgressStats();
+            
+            document.getElementById('quiz-content').style.display = 'none';
+            document.getElementById('quiz-result').style.display = 'block';
+            
+            const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
+            const m = Math.floor(elapsed / 60);
+            const s = (elapsed % 60).toString().padStart(2, '0');
+            
+            document.getElementById('result-score').textContent = totalPoints;
+            document.getElementById('result-score').className = 'result-score ' + (passed ? 'pass' : 'fail');
+            document.getElementById('result-status').textContent = passed ? (currentLang === 'vi' ? '🎉 Đạt yêu cầu!' : '🎉 Zaliczone!') : (currentLang === 'vi' ? '😞 Chưa đạt (cần 68 điểm)' : '😞 Nie zaliczono (potrzeba 68 pkt)');
+            document.getElementById('result-total').textContent = totalPoints + ' / 74';
+            document.getElementById('result-correct').textContent = correctCount + ' / 32';
+            document.getElementById('result-time').textContent = `${m}:${s}`;
+        }
+
+        function restartQuiz() {
+            document.getElementById('quiz-result').style.display = 'none';
+            document.getElementById('quiz-start').style.display = 'block';
+        }
+
+        // Progress Functions
+        function loadProgress() {
+            const saved = localStorage.getItem('driving_test_progress');
+            if (saved) progress = { ...progress, ...JSON.parse(saved) };
+            updateProgressStats();
+        }
+
+        function saveProgress() {
+            localStorage.setItem('driving_test_progress', JSON.stringify(progress));
+        }
+
+        function updateProgressStats() {
+            document.getElementById('progress-total').textContent = progress.totalQuestions;
+            document.getElementById('progress-answered').textContent = progress.answeredQuestions.length;
+            const percent = progress.totalQuestions > 0 ? Math.round((progress.answeredQuestions.length / progress.totalQuestions) * 100) : 0;
+            document.getElementById('progress-percent').textContent = percent;
+            document.getElementById('progress-fill').style.width = percent + '%';
+            const correctRate = progress.answeredQuestions.length > 0 ? Math.round((progress.correctAnswers.length / progress.answeredQuestions.length) * 100) : 0;
+            document.getElementById('progress-correct').textContent = correctRate + '%';
+            document.getElementById('progress-best').textContent = progress.quizBestScore > 0 ? progress.quizBestScore + ' ' + (currentLang === 'vi' ? 'điểm' : 'pkt') : '0 ' + (currentLang === 'vi' ? 'điểm' : 'pkt');
+            const basicTotal = questions.filter(q => q.question_type === 'basic').length;
+            const specialTotal = questions.filter(q => q.question_type === 'special').length;
+            document.getElementById('stat-basic-learned').textContent = progress.basicLearned + ' / ' + (basicTotal || 20);
+            document.getElementById('stat-special-learned').textContent = progress.specialLearned + ' / ' + (specialTotal || 12);
+            document.getElementById('stat-quiz-count').textContent = progress.quizCount;
+            document.getElementById('stat-last-date').textContent = progress.lastStudyDate ? new Date(progress.lastStudyDate).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'pl-PL') : '--';
+        }
+
+        function resetProgress() {
+            if (confirm(translations[currentLang].alert_reset_progress)) {
+                progress = { totalQuestions: questions.length, answeredQuestions: [], correctAnswers: [], quizBestScore: 0, quizCount: 0, lastStudyDate: null, basicLearned: 0, specialLearned: 0 };
+                saveProgress();
+                updateProgressStats();
+            }
+        }
+
+        // Settings Functions
+        function loadSettings() {
+            // Settings are configured directly in the code/GitHub
+            const savedLang = localStorage.getItem('app_lang');
+            if (savedLang) { currentLang = savedLang; switchLanguage(savedLang); }
+        }
+
+        function saveSettings(url, key) {
+            // Settings are configured directly in the code/GitHub
+        }
+    </script>
+</body>
+</html>
