@@ -130,8 +130,9 @@
             <h1>🇵🇱 <span data-text="title">Học Lái Xe Ba Lan</span></h1>
             <p class="header-subtitle" data-text="subtitle">Bài thi lý thuyết</p>
             <div class="lang-switcher">
-                <button class="lang-switch active" data-lang="vi" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
+                <button class="lang-switch" data-lang="vi" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
                 <button class="lang-switch" data-lang="pl" onclick="switchLanguage('pl')">🇵🇱 Polski</button>
+                <button class="lang-switch active" data-lang="bilingual" onclick="switchLanguage('bilingual')">🌐 Song ngữ</button>
             </div>
         </header>
 
@@ -139,45 +140,9 @@
             <button class="nav-tab active" data-tab="lesson" data-text="nav_lesson">📖 Bài học</button>
             <button class="nav-tab" data-tab="quiz" data-text="nav_quiz">📝 Thi thử</button>
             <button class="nav-tab" data-tab="progress" data-text="nav_progress">📊 Tiến độ</button>
-            <button class="nav-tab" data-tab="settings" data-text="nav_settings">⚙️ Cài đặt</button>
         </nav>
 
         <main class="main-content">
-            <!-- Settings Section -->
-            <section id="settings" class="section">
-                <div class="settings-section">
-                    <h2 class="card-title" data-text="settings_title">Cài đặt Supabase</h2>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display: block; margin-bottom: 4px; font-size: 0.9rem;" data-text="settings_url">Supabase URL</label>
-                        <input type="text" id="supabase-url" class="setting-input" placeholder="https://xxx.supabase.co">
-                    </div>
-                    <div style="margin-bottom: 16px;">
-                        <label style="display: block; margin-bottom: 4px; font-size: 0.9rem;" data-text="settings_key">Anon Key</label>
-                        <input type="text" id="supabase-key" class="setting-input" placeholder="eyJhbGciOiJIUzI1NiIs...">
-                    </div>
-                    <button class="btn btn-primary" onclick="connectSupabase()" data-text="settings_connect">Kết nối</button>
-                    <div id="connection-status" style="margin-top: 12px; text-align: center; color: var(--text-secondary);"></div>
-                </div>
-
-                <div class="settings-section">
-                    <h3 data-text="settings_schema">Cấu trúc bảng Supabase</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.8;">
-                        <span data-text="settings_schema_desc">Tạo bảng <code>questions</code>:</span><br><br>
-                        • <code>id</code> (serial, primary key)<br>
-                        • <code>question_pl</code> - Câu hỏi tiếng Ba Lan<br>
-                        • <code>question_vi</code> - Câu hỏi tiếng Việt<br>
-                        • <code>option_a_pl</code>, <code>option_a_vi</code><br>
-                        • <code>option_b_pl</code>, <code>option_b_vi</code><br>
-                        • <code>option_c_pl</code>, <code>option_c_vi</code><br>
-                        • <code>correct_answer</code> (A/B/C)<br>
-                        • <code>question_type</code> ('basic'/'special')<br>
-                        • <code>points</code> (1/2/3)<br>
-                        • <code>explanation_vi</code><br>
-                        • <code>image_url</code> (nullable)
-                    </p>
-                </div>
-            </section>
-
             <!-- Lesson Section -->
             <section id="lesson" class="section active">
                 <div class="lesson-header">
@@ -300,13 +265,6 @@
                 nav_lesson: '📖 Bài học',
                 nav_quiz: '📝 Thi thử',
                 nav_progress: '📊 Tiến độ',
-                nav_settings: '⚙️ Cài đặt',
-                settings_title: 'Cài đặt Supabase',
-                settings_url: 'Supabase URL',
-                settings_key: 'Anon Key',
-                settings_connect: 'Kết nối',
-                settings_schema: 'Cấu trúc bảng Supabase',
-                settings_schema_desc: 'Tạo bảng <code>questions</code>:',
                 question_label: 'Câu',
                 loading: 'Đang tải câu hỏi...',
                 type_basic: 'Cơ bản',
@@ -353,19 +311,64 @@
                 alert_reset_progress: 'Xóa toàn bộ tiến độ?',
                 alert_need_more: ' câu.'
             },
+            bilingual: {
+                title: '🇵🇱🇻🇳 Học Lái Xe - Bilingual',
+                subtitle: 'Theory exam',
+                nav_lesson: '📖 Lesson',
+                nav_quiz: '📝 Quiz',
+                nav_progress: '📊 Progress',
+                question_label: 'Question',
+                loading: 'Loading questions...',
+                type_basic: 'Basic',
+                type_special: 'Specialist',
+                explanation_title: 'Explanation:',
+                btn_check: 'Check',
+                btn_next: 'Next →',
+                btn_prev: '← Previous',
+                btn_shuffle: '🔀 Shuffle',
+                quiz_title: 'Practice Exam',
+                quiz_info: '32 questions in 25 minutes<br><span>Pass score: 68/74</span>',
+                quiz_pass: 'Pass score: 68/74',
+                quiz_structure_title: 'Exam structure:',
+                quiz_basic: '📚 20 basic questions (T/F)',
+                quiz_special: '⚙️ 12 specialist questions (A/B/C)',
+                quiz_pass_info: '68+ to pass',
+                quiz_start: 'Start exam',
+                quiz_total: 'Total:',
+                quiz_question_time: 'Q:',
+                quiz_next: 'Next question →',
+                quiz_progress: 'Question',
+                quiz_result: 'See results ✓',
+                result_title: 'Exam Results',
+                result_total: 'Total score',
+                result_pass: 'Pass score',
+                result_correct: 'Correct answers',
+                result_time: 'Time',
+                result_retry: 'Try again',
+                progress_title: 'Learning Progress',
+                progress_total: 'Total questions',
+                progress_answered: 'Answered',
+                progress_correct: 'Correct rate',
+                progress_best: 'Best score',
+                progress_complete: 'completed',
+                progress_detail_title: 'Detailed Statistics',
+                progress_basic: 'Basic questions learned',
+                progress_special: 'Specialist questions learned',
+                progress_quiz_count: 'Exam attempts',
+                progress_last_date: 'Last study',
+                progress_reset: 'Reset progress',
+                alert_need_questions: 'Need at least 32 questions. Currently: ',
+                alert_no_questions: 'No questions. Please add data to Supabase.',
+                alert_completed: 'You completed all questions!',
+                alert_reset_progress: 'Delete all progress?',
+                alert_need_more: ' questions.'
+            },
             pl: {
                 title: 'Nauka Jazdy - Polska',
                 subtitle: 'Egamin teoretyczny',
                 nav_lesson: '📖 Lekcja',
                 nav_quiz: '📝 Test',
                 nav_progress: '📊 Postęp',
-                nav_settings: '⚙️ Ustawienia',
-                settings_title: 'Ustawienia Supabase',
-                settings_url: 'Supabase URL',
-                settings_key: 'Anon Key',
-                settings_connect: 'Połącz',
-                settings_schema: 'Struktura tabeli Supabase',
-                settings_schema_desc: 'Utwórz tabelę <code>questions</code>:',
                 question_label: 'Pytanie',
                 loading: 'Ładowanie pytań...',
                 type_basic: 'Podstawowe',
@@ -446,7 +449,7 @@
             loadProgress();
             loadSettings();
             initNavigation();
-            switchLanguage('vi');
+            switchLanguage('bilingual');
         });
 
         // Language switching
@@ -468,15 +471,6 @@
             document.querySelector('[data-text="nav_lesson"]').textContent = t.nav_lesson;
             document.querySelector('[data-text="nav_quiz"]').textContent = t.nav_quiz;
             document.querySelector('[data-text="nav_progress"]').textContent = t.nav_progress;
-            document.querySelector('[data-text="nav_settings"]').textContent = t.nav_settings;
-            
-            // Update settings
-            document.querySelector('[data-text="settings_title"]').textContent = t.settings_title;
-            document.querySelector('[data-text="settings_url"]').textContent = t.settings_url;
-            document.querySelector('[data-text="settings_key"]').textContent = t.settings_key;
-            document.querySelector('[data-text="settings_connect"]').textContent = t.settings_connect;
-            document.querySelector('[data-text="settings_schema"]').textContent = t.settings_schema;
-            document.querySelector('[data-text="settings_schema_desc"]').innerHTML = t.settings_schema_desc;
             
             // Update lesson
             document.querySelector('[data-text="question_label"]').textContent = t.question_label;
@@ -521,8 +515,8 @@
             document.querySelector('[data-text="progress_last_date"]').textContent = t.progress_last_date;
             document.querySelector('[data-text="progress_reset"]').textContent = t.progress_reset;
             
-            // Update view mode for questions
-            viewMode = lang === 'pl' ? 'polish' : 'vietnamese';
+            // Update view mode for questions (bilingual shows both languages)
+            viewMode = lang;
             if (questions.length > 0) {
                 displayLessonQuestion();
             }
@@ -645,13 +639,21 @@
         }
 
         function getQuestionText(q) {
-            return viewMode === 'polish' ? (q.question_pl || q.question_vi) : (q.question_vi || q.question_pl);
+            if (viewMode === 'polish') return q.question_pl || q.question_vi;
+            if (viewMode === 'vietnamese') return q.question_vi || q.question_pl;
+            // Bilingual mode - show both
+            if (q.question_pl && q.question_vi) return q.question_pl + '\n\n' + q.question_vi;
+            return q.question_pl || q.question_vi || '';
         }
 
         function getOptionText(q, key) {
             const pl = q[key + '_pl'] || '';
             const vi = q[key + '_vi'] || '';
-            return viewMode === 'polish' ? pl : vi;
+            if (viewMode === 'polish') return pl || vi;
+            if (viewMode === 'vietnamese') return vi || pl;
+            // Bilingual mode - show both
+            if (pl && vi) return pl + '\n' + vi;
+            return pl || vi;
         }
 
         function selectLessonOption(element, letter) {
@@ -943,18 +945,13 @@
 
         // Settings Functions
         function loadSettings() {
-            const url = localStorage.getItem('supabase_url');
-            const key = localStorage.getItem('supabase_key');
+            // Settings are configured directly in the code/GitHub
             const savedLang = localStorage.getItem('app_lang');
-            if (url) document.getElementById('supabase-url').value = url;
-            if (key) document.getElementById('supabase-key').value = key;
             if (savedLang) { currentLang = savedLang; switchLanguage(savedLang); }
-            if (url && key) connectSupabase();
         }
 
         function saveSettings(url, key) {
-            if (url) localStorage.setItem('supabase_url', url);
-            if (key) localStorage.setItem('supabase_key', key);
+            // Settings are configured directly in the code/GitHub
         }
     </script>
 </body>
