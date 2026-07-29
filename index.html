@@ -8,138 +8,155 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --primary-light: #60a5fa;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border: #334155;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+            --radius: 16px;
+            --radius-sm: 10px;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark);
+            background: linear-gradient(135deg, #f0f4ff 0%, #fafbff 50%, #f0fdf4 100%);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
         }
-        .container { max-width: 100%; padding: 16px; min-height: 100vh; display: flex; flex-direction: column; }
-        .header { text-align: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; position: relative; }
-        .header h1 { font-size: 1.5rem; color: var(--primary); margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.85rem; color: var(--text-secondary); }
-        .lang-switcher { position: absolute; top: 16px; right: 0; display: flex; gap: 8px; }
-        .lang-switch { padding: 6px 12px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
-        .lang-switch.active { background: var(--primary); border-color: var(--primary); color: white; }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 8px; }
+        .container { max-width: 100%; padding: 12px; min-height: 100vh; display: flex; flex-direction: column; gap: 12px; }
+        .header { text-align: center; padding: 16px 0 12px; background: var(--bg-white); border-radius: var(--radius); box-shadow: var(--shadow); position: relative; }
+        .header h1 { font-size: 1.3rem; color: var(--primary); margin-bottom: 2px; font-weight: 700; }
+        .header-subtitle { font-size: 0.8rem; color: var(--text-secondary); }
+        .lang-switcher { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
+        .lang-switch { padding: 8px 14px; background: var(--bg-light); border: 1.5px solid var(--border); border-radius: 20px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .lang-switch.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+        .lang-switch:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 0; }
         .nav-tab {
-            flex: 1; min-width: 100px; padding: 12px 16px;
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: 12px; color: var(--text-secondary);
-            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            flex: 1; padding: 12px 8px;
+            background: var(--bg-white); border: none;
+            border-radius: var(--radius-sm); color: var(--text-secondary);
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
             transition: all 0.2s; text-align: center; white-space: nowrap;
+            box-shadow: var(--shadow);
         }
-        .nav-tab.active { background: var(--primary); border-color: var(--primary); color: white; }
-        .nav-tab:hover:not(.active) { border-color: var(--primary); color: var(--text-primary); }
-        .main-content { flex: 1; display: flex; flex-direction: column; }
+        .nav-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
+        .nav-tab:hover:not(.active) { color: var(--primary); }
+        .main-content { flex: 1; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
         .section { display: none; flex-direction: column; flex: 1; min-height: 0; }
         .section.active { display: flex; }
-        .card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        .card-title { font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary); }
-        .progress-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .stat-card { background: var(--bg-dark); border-radius: 8px; padding: 16px; text-align: center; }
-        .stat-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
-        .progress-bar { height: 8px; background: var(--bg-dark); border-radius: 4px; overflow: hidden; margin-top: 16px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 4px; transition: width 0.3s; }
-        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
-        .lesson-counter { font-size: 0.9rem; color: var(--text-secondary); }
-        .question-box { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-        .question-type { display: inline-block; padding: 4px 12px; background: var(--primary); border-radius: 20px; font-size: 0.75rem; margin-bottom: 12px; text-transform: uppercase; }
-        .question-type.basic { background: #3b82f6; }
+        .card { background: var(--bg-card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+        .card-title { font-size: 1rem; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
+        .progress-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .stat-card { background: var(--bg-light); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 12px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 3px; transition: width 0.3s; }
+        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .lesson-counter { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+        .question-box { background: var(--bg-card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
+        .question-type { display: inline-block; padding: 4px 12px; background: var(--primary); border-radius: 20px; font-size: 0.7rem; margin-bottom: 10px; text-transform: uppercase; font-weight: 600; color: white; }
+        .question-type.basic { background: var(--primary); }
         .question-type.special { background: #8b5cf6; }
-        .question-text { font-size: 1.1rem; line-height: 1.7; margin-bottom: 16px; white-space: pre-wrap; }
-        .question-image { max-width: 100%; border-radius: 8px; margin-bottom: 16px; }
-        .options { display: flex; flex-direction: column; gap: 10px; }
-        .option { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--bg-dark); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .option:hover:not(.disabled) { border-color: var(--primary); }
-        .option.selected { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
-        .option.correct { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
-        .option.incorrect { border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-        .option.disabled { cursor: not-allowed; opacity: 0.7; }
-        .option-letter { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: var(--bg-card); border-radius: 50%; font-weight: 700; font-size: 0.9rem; flex-shrink: 0; }
+        .question-text { font-size: 1rem; line-height: 1.6; margin-bottom: 14px; white-space: pre-wrap; font-weight: 500; }
+        .question-image { max-width: 100%; border-radius: var(--radius-sm); margin-bottom: 14px; }
+        .options { display: flex; flex-direction: column; gap: 8px; }
+        .option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--bg-light); border: 2px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+        .option:hover:not(.disabled) { border-color: var(--primary); background: #eff6ff; }
+        .option.selected { border-color: var(--primary); background: #dbeafe; }
+        .option.correct { border-color: var(--success); background: #d1fae5; }
+        .option.incorrect { border-color: var(--danger); background: #fee2e2; }
+        .option.disabled { cursor: not-allowed; opacity: 0.75; }
+        .option-letter { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--bg-white); border-radius: 50%; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .option.selected .option-letter { background: var(--primary); color: white; }
         .option.correct .option-letter { background: var(--success); color: white; }
         .option.incorrect .option-letter { background: var(--danger); color: white; }
-        .option-text { flex: 1; padding-top: 4px; font-size: 1rem; white-space: pre-wrap; }
-        .btn { padding: 14px 24px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; }
-        .btn-primary { background: var(--primary); color: white; }
+        .option-text { flex: 1; padding-top: 2px; font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; }
+        .btn { padding: 14px 20px; border: none; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
         .btn-primary:hover { background: var(--primary-dark); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
-        .btn-group { display: flex; gap: 12px; margin-top: 16px; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+        .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
+        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1.5px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-group { display: flex; gap: 10px; margin-top: 12px; }
         .btn-group .btn { flex: 1; }
-        .explanation { margin-top: 16px; padding: 16px; background: rgba(37, 99, 235, 0.1); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; }
-        .explanation-title { font-weight: 600; color: var(--primary); margin-bottom: 8px; }
-        .timer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; background: var(--bg-card); border-radius: 8px; margin-bottom: 16px; }
-        .timer-value { font-size: 1.5rem; font-weight: 700; font-family: monospace; }
+        .explanation { margin-top: 12px; padding: 14px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+        .explanation-title { font-weight: 600; color: var(--primary); margin-bottom: 6px; font-size: 0.9rem; }
+        .explanation p { font-size: 0.9rem; line-height: 1.5; color: var(--text-primary); }
+        .timer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: var(--bg-white); border-radius: var(--radius-sm); margin-bottom: 12px; box-shadow: var(--shadow); }
+        .timer-value { font-size: 1.4rem; font-weight: 700; font-family: monospace; color: var(--primary); }
         .timer-value.warning { color: var(--warning); }
         .timer-value.danger { color: var(--danger); animation: pulse 0.5s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .result-card { text-align: center; padding: 32px 16px; }
-        .result-score { font-size: 4rem; font-weight: 700; margin-bottom: 8px; }
+        .result-card { text-align: center; padding: 24px 16px; }
+        .result-score { font-size: 3.5rem; font-weight: 700; margin-bottom: 8px; }
         .result-score.pass { color: var(--success); }
         .result-score.fail { color: var(--danger); }
-        .result-status { font-size: 1.2rem; margin-bottom: 24px; }
-        .result-details { text-align: left; margin-bottom: 24px; }
-        .result-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px; text-align: center; }
-        .spinner { width: 48px; height: 48px; border: 4px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        .result-status { font-size: 1.1rem; margin-bottom: 20px; color: var(--text-secondary); }
+        .result-details { text-align: left; margin-bottom: 20px; }
+        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .result-item:last-child { border-bottom: none; }
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 14px; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .quiz-start { text-align: center; padding: 24px; }
-        .quiz-info { background: var(--bg-card); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: left; }
-        .quiz-info h3 { margin-bottom: 12px; color: var(--primary); }
-        .quiz-info ul { list-style: none; padding: 0; }
-        .quiz-info li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        .loading p { color: var(--text-secondary); font-size: 0.9rem; }
+        .quiz-start { text-align: center; padding: 20px 12px; }
+        .quiz-start h2 { margin-bottom: 12px; color: var(--primary); font-size: 1.2rem; }
+        .quiz-start > p { color: var(--text-secondary); margin-bottom: 16px; font-size: 0.85rem; line-height: 1.5; }
+        .quiz-info { background: var(--bg-light); border-radius: var(--radius-sm); padding: 14px; margin: 14px 0; text-align: left; }
+        .quiz-info h3 { margin-bottom: 10px; color: var(--primary); font-size: 0.9rem; }
+        .quiz-info ul { list-style: none; padding: 0; margin: 0; }
+        .quiz-info li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.85rem; }
         .quiz-info li:last-child { border-bottom: none; }
-        .question-dots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 16px; max-height: 150px; overflow-y: auto; }
-        .dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 600; background: var(--bg-dark); border: 2px solid var(--border); color: var(--text-secondary); flex-shrink: 0; }
+        .quiz-info li span:first-child { color: var(--text-primary); }
+        .question-dots { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 12px; max-height: 120px; overflow-y: auto; }
+        .dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; background: var(--bg-light); border: 1.5px solid var(--border); color: var(--text-secondary); flex-shrink: 0; }
         .dot.answered { background: var(--success); border-color: var(--success); color: white; }
         .dot.current { background: var(--primary); border-color: var(--primary); color: white; }
         .dot.wrong { background: var(--danger); border-color: var(--danger); color: white; }
-        .quiz-timer-info { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; padding: 0 4px; }
-        .settings-section { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-        .setting-input { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text-primary); width: 100%; font-size: 0.85rem; margin-bottom: 12px; }
-        .setting-input:focus { outline: none; border-color: var(--primary); }
-        @media (max-width: 480px) {
-            .container { padding: 12px; }
-            .header h1 { font-size: 1.3rem; }
-            .progress-stats { grid-template-columns: 1fr; }
-            .btn-group { flex-direction: column; }
-            .question-text { font-size: 1rem; }
-            .lang-switcher { position: static; justify-content: center; margin-top: 8px; }
+        .quiz-timer-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; }
+        @media (max-width: 380px) {
+            .container { padding: 8px; gap: 8px; }
+            .header { padding: 12px 0 10px; }
+            .header h1 { font-size: 1.15rem; }
+            .lang-switch { padding: 6px 10px; font-size: 0.7rem; }
+            .nav-tab { padding: 10px 6px; font-size: 0.8rem; }
+            .progress-stats { gap: 8px; }
+            .stat-card { padding: 10px 8px; }
+            .stat-value { font-size: 1.3rem; }
+            .question-box, .card { padding: 12px; }
+            .btn { padding: 12px 16px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-            <h1>🇵🇱 <span data-text="title">Học Lái Xe Ba Lan</span></h1>
+            <h1><span data-text="title">Học Lái Xe Ba Lan</span></h1>
             <p class="header-subtitle" data-text="subtitle">Bài thi lý thuyết</p>
             <div class="lang-switcher">
-                <button class="lang-switch" data-lang="vi" onclick="switchLanguage('vi')">🇻🇳 Tiếng Việt</button>
-                <button class="lang-switch" data-lang="pl" onclick="switchLanguage('pl')">🇵🇱 Polski</button>
-                <button class="lang-switch active" data-lang="bilingual" onclick="switchLanguage('bilingual')">🌐 Song ngữ</button>
+                <button class="lang-switch" data-lang="vi" onclick="switchLanguage('vi')">Tiếng Việt</button>
+                <button class="lang-switch" data-lang="pl" onclick="switchLanguage('pl')">Polski</button>
+                <button class="lang-switch active" data-lang="bilingual" onclick="switchLanguage('bilingual')">Song ngữ</button>
             </div>
         </header>
 
         <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="lesson" data-text="nav_lesson">📖 Bài học</button>
-            <button class="nav-tab" data-tab="quiz" data-text="nav_quiz">📝 Thi thử</button>
-            <button class="nav-tab" data-tab="progress" data-text="nav_progress">📊 Tiến độ</button>
+            <button class="nav-tab active" data-tab="lesson" data-text="nav_lesson">Bài học</button>
+            <button class="nav-tab" data-tab="quiz" data-text="nav_quiz">Thi thử</button>
+            <button class="nav-tab" data-tab="progress" data-text="nav_progress">Tiến độ</button>
         </nav>
 
         <main class="main-content">
@@ -171,7 +188,7 @@
                     </div>
                     <div class="btn-group">
                         <button class="btn btn-secondary" onclick="prevLessonQuestion()" data-text="btn_prev">← Câu trước</button>
-                        <button class="btn btn-secondary" onclick="shuffleQuestions()">🔀 <span data-text="btn_shuffle">Xáo trộn</span></button>
+                        <button class="btn btn-secondary" onclick="shuffleQuestions()"><span data-text="btn_shuffle">Xáo trộn</span></button>
                     </div>
                 </div>
             </section>
@@ -180,16 +197,16 @@
             <section id="quiz" class="section">
                 <div id="quiz-start" class="quiz-start">
                     <h2 style="margin-bottom: 16px;" data-text="quiz_title">Bài Thi Thử</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px;" data-text="quiz_info">32 câu hỏi trong 25 phút / 32 pytania w 25 minut<br><span data-text="quiz_pass">Điểm đạt: 68/74</span></p>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.85rem;" data-text="quiz_info">32 câu / 25 phút<br><span data-text="quiz_pass">Điểm đạt: 68/74</span></p>
                     <div class="quiz-info">
                         <h3 data-text="quiz_structure_title">Cấu trúc bài thi:</h3>
                         <ul>
-                            <li><span data-text="quiz_basic">📚 20 câu cơ bản (Đ/S)</span><span style="color: var(--primary);">44 điểm</span></li>
-                            <li><span data-text="quiz_special">⚙️ 12 câu chuyên ngành (A/B/C)</span><span style="color: var(--primary);">30 điểm</span></li>
-                            <li><span>⏱️ 25 phút</span><span style="color: var(--success);" data-text="quiz_pass_info">68+ để đạt</span></li>
+                            <li><span data-text="quiz_basic">20 câu cơ bản (Đ/S)</span><span style="color: var(--primary);">44 điểm</span></li>
+                            <li><span data-text="quiz_special">12 câu chuyên ngành (A/B/C)</span><span style="color: var(--primary);">30 điểm</span></li>
+                            <li><span>25 phút</span><span style="color: var(--success);" data-text="quiz_pass_info">68+ để đạt</span></li>
                         </ul>
                     </div>
-                    <button class="btn btn-primary" onclick="startQuiz()" style="max-width: 300px; margin: 0 auto;">🚗 <span data-text="quiz_start">Bắt đầu thi</span></button>
+                    <button class="btn btn-primary" onclick="startQuiz()" style="max-width: 300px; margin: 0 auto;"><span data-text="quiz_start">Bắt đầu thi</span></button>
                 </div>
 
                 <div id="quiz-content" style="display: none;">
@@ -198,7 +215,6 @@
                         <span><span data-text="quiz_question_time">Câu:</span> <span id="question-time">00:35</span></span>
                     </div>
                     <div class="timer">
-                        <span>⏱️</span>
                         <span id="quiz-timer" class="timer-value">25:00</span>
                     </div>
                     <div class="question-dots" id="quiz-dots"></div>
@@ -251,7 +267,7 @@
                         <div class="result-item"><span data-text="progress_last_date">Ngày học gần nhất</span><span id="stat-last-date">--</span></div>
                     </div>
                 </div>
-                <button class="btn btn-secondary" onclick="resetProgress()">🗑️ <span data-text="progress_reset">Xóa tiến độ</span></button>
+                <button class="btn btn-secondary" onclick="resetProgress()"><span data-text="progress_reset">Xóa tiến độ</span></button>
             </section>
         </main>
     </div>
@@ -262,9 +278,9 @@
             vi: {
                 title: 'Học Lái Xe Ba Lan',
                 subtitle: 'Bài thi lý thuyết',
-                nav_lesson: '📖 Bài học',
-                nav_quiz: '📝 Thi thử',
-                nav_progress: '📊 Tiến độ',
+                nav_lesson: 'Bài học',
+                nav_quiz: 'Thi thử',
+                nav_progress: 'Tiến độ',
                 question_label: 'Câu',
                 loading: 'Đang tải câu hỏi...',
                 type_basic: 'Cơ bản',
@@ -278,15 +294,15 @@
                 quiz_info: '32 câu hỏi trong 25 phút<br><span>Điểm đạt: 68/74</span>',
                 quiz_pass: 'Điểm đạt: 68/74',
                 quiz_structure_title: 'Cấu trúc bài thi:',
-                quiz_basic: '📚 20 câu cơ bản (Đ/S)',
-                quiz_special: '⚙️ 12 câu chuyên ngành (A/B/C)',
+                quiz_basic: '20 câu cơ bản (Đ/S) - 44 điểm',
+                quiz_special: '12 câu chuyên ngành (A/B/C) - 30 điểm',
                 quiz_pass_info: '68+ để đạt',
                 quiz_start: 'Bắt đầu thi',
                 quiz_total: 'Tổng:',
                 quiz_question_time: 'Câu:',
                 quiz_next: 'Câu tiếp theo →',
                 quiz_progress: 'Câu',
-                quiz_result: 'Xem kết quả ✓',
+                quiz_result: 'Xem kết quả',
                 result_title: 'Kết quả bài thi',
                 result_total: 'Tổng điểm',
                 result_pass: 'Điểm đạt',
@@ -312,63 +328,63 @@
                 alert_need_more: ' câu.'
             },
             bilingual: {
-                title: '🇻🇳🇵🇱 Học Lái Xe - Song ngữ',
-                subtitle: 'Bài thi lý thuyết / Egzamin teoretyczny',
-                nav_lesson: '📖 Bài học / Lekcja',
-                nav_quiz: '📝 Thi thử / Test',
-                nav_progress: '📊 Tiến độ / Postęp',
+                title: 'Học Lái Xe - Song ngữ',
+                subtitle: 'Bài thi lý thuyết',
+                nav_lesson: 'Bài học / Lekcja',
+                nav_quiz: 'Thi thử / Test',
+                nav_progress: 'Tiến độ / Postęp',
                 question_label: 'Câu / Pytanie',
-                loading: 'Đang tải câu hỏi... / Ładowanie pytań...',
+                loading: 'Đang tải / Ładowanie...',
                 type_basic: 'Cơ bản / Podstawowe',
                 type_special: 'Chuyên ngành / Specjalistyczne',
                 explanation_title: 'Giải thích: / Wyjaśnienie:',
                 btn_check: 'Kiểm tra / Sprawdź',
-                btn_next: 'Câu tiếp theo → / Następne pytanie →',
-                btn_prev: '← Câu trước / ← Poprzednie',
-                btn_shuffle: '🔀 Xáo trộn / Losuj',
+                btn_next: 'Tiếp theo → / Następne →',
+                btn_prev: '← Trước / ← Poprzednie',
+                btn_shuffle: 'Xáo trộn / Losuj',
                 quiz_title: 'Bài Thi Thử / Próbny Egzamin',
-                quiz_info: '32 câu hỏi trong 25 phút<br><span>Điểm đạt: 68/74</span>',
+                quiz_info: '32 câu / 25 phút<br><span>Điểm đạt: 68/74</span>',
                 quiz_pass: 'Điểm đạt: 68/74',
-                quiz_structure_title: 'Cấu trúc bài thi: / Struktura egzaminu:',
-                quiz_basic: '📚 20 câu cơ bản (Đ/S) / 20 pytań podstawowych (T/N)',
-                quiz_special: '⚙️ 12 câu chuyên ngành (A/B/C) / 12 pytań specjalistycznych (A/B/C)',
-                quiz_pass_info: '68+ để đạt / 68+ do zaliczenia',
-                quiz_start: 'Bắt đầu thi / Rozpocznij egzamin',
+                quiz_structure_title: 'Cấu trúc / Struktura:',
+                quiz_basic: '20 câu cơ bản (Đ/S) / 20 pytań podstawowych (T/N)',
+                quiz_special: '12 câu chuyên ngành (A/B/C) / 12 pytań specjalistycznych',
+                quiz_pass_info: '68+ để đạt / do zaliczenia',
+                quiz_start: 'Bắt đầu / Rozpocznij',
                 quiz_total: 'Tổng: / Razem:',
                 quiz_question_time: 'Câu: / Pytanie:',
-                quiz_next: 'Câu tiếp theo → / Następne pytanie →',
+                quiz_next: 'Tiếp theo → / Następne →',
                 quiz_progress: 'Câu / Pytanie',
-                quiz_result: 'Xem kết quả ✓ / Zobacz wyniki ✓',
-                result_title: 'Kết quả bài thi / Wynik egzaminu',
+                quiz_result: 'Kết quả / Wyniki',
+                result_title: 'Kết quả / Wynik egzaminu',
                 result_total: 'Tổng điểm / Wynik całkowity',
                 result_pass: 'Điểm đạt / Wynik zaliczeniowy',
-                result_correct: 'Câu đúng / Poprawne odpowiedzi',
+                result_correct: 'Câu đúng / Poprawne',
                 result_time: 'Thời gian / Czas',
                 result_retry: 'Làm lại / Spróbuj ponownie',
-                progress_title: 'Tiến độ học tập / Postęp nauki',
-                progress_total: 'Tổng câu hỏi / Wszystkie pytania',
+                progress_title: 'Tiến độ / Postęp nauki',
+                progress_total: 'Tổng câu / Wszystkie pytania',
                 progress_answered: 'Đã trả lời / Odpowiedziano',
                 progress_correct: 'Tỷ lệ đúng / Wynik poprawny',
                 progress_best: 'Điểm cao nhất / Najlepszy wynik',
                 progress_complete: 'hoàn thành / ukończono',
-                progress_detail_title: 'Thống kê chi tiết / Statystyki szczegółowe',
-                progress_basic: 'Câu cơ bản đã học / Pytania podstawowe',
-                progress_special: 'Câu chuyên ngành đã học / Pytania specjalistyczne',
+                progress_detail_title: 'Thống kê / Statystyki',
+                progress_basic: 'Câu cơ bản / Pytania podstawowe',
+                progress_special: 'Câu chuyên ngành / Pytania specjalistyczne',
                 progress_quiz_count: 'Số lần thi / Liczba egzaminów',
                 progress_last_date: 'Ngày học gần nhất / Ostatnia nauka',
                 progress_reset: 'Xóa tiến độ / Reset postępu',
-                alert_need_questions: 'Cần ít nhất 32 câu hỏi. Hiện tại: / Potrzeba co najmniej 32 pytań. Aktualnie: ',
-                alert_no_questions: 'Chưa có câu hỏi. Vui lòng thêm dữ liệu vào Supabase. / Brak pytań. Dodaj dane do Supabase.',
-                alert_completed: 'Bạn đã hoàn thành tất cả câu hỏi! / Ukończyłeś wszystkie pytania!',
-                alert_reset_progress: 'Xóa toàn bộ tiến độ? / Usunąć cały postęp?',
+                alert_need_questions: 'Cần 32 câu. Hiện tại: / Potrzeba 32 pytań. Aktualnie: ',
+                alert_no_questions: 'Chưa có câu hỏi. / Brak pytań.',
+                alert_completed: 'Hoàn thành! / Ukończono!',
+                alert_reset_progress: 'Xóa tiến độ? / Usunąć postęp?',
                 alert_need_more: ' câu. / pytań.'
             },
             pl: {
                 title: 'Nauka Jazdy - Polska',
-                subtitle: 'Egamin teoretyczny',
-                nav_lesson: '📖 Lekcja',
-                nav_quiz: '📝 Test',
-                nav_progress: '📊 Postęp',
+                subtitle: 'Egzamin teoretyczny',
+                nav_lesson: 'Lekcja',
+                nav_quiz: 'Test',
+                nav_progress: 'Postęp',
                 question_label: 'Pytanie',
                 loading: 'Ładowanie pytań...',
                 type_basic: 'Podstawowe',
@@ -382,15 +398,15 @@
                 quiz_info: '32 pytania w 25 minut<br><span>Wynik do zaliczenia: 68/74</span>',
                 quiz_pass: 'Wynik do zaliczenia: 68/74',
                 quiz_structure_title: 'Struktura egzaminu:',
-                quiz_basic: '📚 20 pytań podstawowych (T/N)',
-                quiz_special: '⚙️ 12 pytań specjalistycznych (A/B/C)',
+                quiz_basic: '20 pytań podstawowych (T/N) - 44 pkt',
+                quiz_special: '12 pytań specjalistycznych (A/B/C) - 30 pkt',
                 quiz_pass_info: '68+ do zaliczenia',
                 quiz_start: 'Rozpocznij egzamin',
                 quiz_total: 'Razem:',
                 quiz_question_time: 'Pytanie:',
                 quiz_next: 'Następne pytanie →',
                 quiz_progress: 'Pytanie',
-                quiz_result: 'Zobacz wyniki ✓',
+                quiz_result: 'Zobacz wyniki',
                 result_title: 'Wynik egzaminu',
                 result_total: 'Wynik całkowity',
                 result_pass: 'Wynik zaliczeniowy',
@@ -898,7 +914,7 @@
             
             document.getElementById('result-score').textContent = totalPoints;
             document.getElementById('result-score').className = 'result-score ' + (passed ? 'pass' : 'fail');
-            document.getElementById('result-status').textContent = passed ? (currentLang === 'vi' ? '🎉 Đạt yêu cầu!' : '🎉 Zaliczone!') : (currentLang === 'vi' ? '😞 Chưa đạt (cần 68 điểm)' : '😞 Nie zaliczono (potrzeba 68 pkt)');
+            document.getElementById('result-status').textContent = passed ? (currentLang === 'vi' ? 'Đạt yêu cầu!' : 'Zaliczone!') : (currentLang === 'vi' ? 'Chưa đạt (cần 68 điểm)' : 'Nie zaliczono (potrzeba 68 pkt)');
             document.getElementById('result-total').textContent = totalPoints + ' / 74';
             document.getElementById('result-correct').textContent = correctCount + ' / 32';
             document.getElementById('result-time').textContent = `${m}:${s}`;
