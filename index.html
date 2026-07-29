@@ -93,7 +93,9 @@
         .btn-group { display: flex; gap: 10px; margin-top: 12px; }
         .btn-group .btn { flex: 1; }
         .explanation { margin-top: 12px; padding: 14px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
-        .explanation-title { font-weight: 600; color: var(--primary); margin-bottom: 6px; font-size: 0.9rem; }
+        .explanation.correct { background: #d1fae5; border-left-color: var(--success); }
+        .explanation.incorrect { background: #fee2e2; border-left-color: var(--danger); }
+        .explanation-title { font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
         .explanation p { font-size: 0.9rem; line-height: 1.5; color: var(--text-primary); }
         .timer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: var(--bg-white); border-radius: var(--radius-sm); margin-bottom: 12px; box-shadow: var(--shadow); }
         .timer-value { font-size: 1.4rem; font-weight: 700; font-family: monospace; color: var(--primary); }
@@ -433,6 +435,170 @@
             }
         };
 
+        // Sample Questions (Fallback when no Supabase data)
+        const sampleQuestions = [
+            {
+                id: 1,
+                question_type: 'basic',
+                question_pl: 'Czy na skrzyżowaniu dróg o ruchu okrężnym (rondo) ustępuje się pierwszeństwa pojazdom nadjeżdżającym z prawej strony?',
+                question_vi: 'Tại ngã tư vòng xuyến (bùng binh), xe nào có quyền ưu tiên?',
+                image_url: '',
+                option_a_pl: 'Tak, zawsze ustępuje się pierwszeństwa pojazdom z prawej strony',
+                option_a_vi: 'Đúng, luôn nhường đường cho xe từ bên phải',
+                option_b_pl: 'Nie, na rondzie pierwszeństwo mają pojazdy już znajdujące się na rondzie',
+                option_b_vi: 'Sai, tại bùng binh xe đã ở trên bùng binh có quyền ưu tiên',
+                option_c_pl: 'Zależy od wielkości ronda',
+                option_c_vi: 'Tùy thuộc vào kích thước bùng binh',
+                correct_answer: 'B',
+                explanation_vi: 'Tại bùng binh, xe đã đang ở trên bùng binh có quyền ưu tiên. Xe entering phải nhường đường cho xe đang di chuyển trên bùng binh.',
+                explanation_pl: 'Na rondzie pierwszeństwo mają pojazdy już znajdujące się na skrzyżowaniu okrężnym. Pojazdy wjeżdżające na rondo muszą ustąpić pierwszeństwa.'
+            },
+            {
+                id: 2,
+                question_type: 'basic',
+                question_pl: 'Z jaką maksymalną prędkością może poruszać się samochód osobowy na autostradzie w Polsce?',
+                question_vi: 'Tốc độ tối đa cho phép của ô tô con trên đường cao tốc ở Ba Lan là bao nhiêu?',
+                image_url: '',
+                option_a_pl: '100 km/h',
+                option_a_vi: '100 km/h',
+                option_b_pl: '140 km/h',
+                option_b_vi: '140 km/h',
+                option_c_pl: '130 km/h',
+                option_c_vi: '130 km/h',
+                correct_answer: 'C',
+                explanation_vi: 'Theo luật giao thông Ba Lan, tốc độ tối đa trên đường cao tốc đối với ô tô con là 130 km/h (tốc độ được khuyến nghị là 120 km/h).',
+                explanation_pl: 'Zgodnie z polskim prawem o ruchu drogowym, maksymalna prędkość dla samochodów osobowych na autostradzie wynosi 130 km/h (zalecana to 120 km/h).'
+            },
+            {
+                id: 3,
+                question_type: 'basic',
+                question_pl: 'Czy kierowca może rozmawiać przez telefon komórkowy podczas jazdy, jeśli używa zestawu głośnomówiącego?',
+                question_vi: 'Người lái xe có được phép nghe điện thoại khi đang lái xe không?',
+                image_url: '',
+                option_a_pl: 'Tak, ale tylko w przypadku używania zestawu głośnomówiącego lub słuchawek',
+                option_a_vi: 'Có, nhưng chỉ khi sử dụng thiết bị rảnh tay hoặc tai nghe',
+                option_b_pl: 'Nie, rozmowa przez telefon jest zawsze zabroniona podczas jazdy',
+                option_b_vi: 'Không, nói chuyện qua điện thoại luôn bị cấm khi đang lái xe',
+                option_c_pl: 'Tak, bez żadnych ograniczeń',
+                option_c_vi: 'Có, không có giới hạn nào',
+                correct_answer: 'A',
+                explanation_vi: 'Sử dụng điện thoại khi lái xe chỉ được phép khi sử dụng thiết bị rảnh tay (hands-free) hoặc tai nghe không dây, nhưng bạn vẫn phải cầm lái cẩn thận.',
+                explanation_pl: 'Korzystanie z telefonu podczas jazdy jest dozwolone tylko wtedy, gdy używany jest zestaw głośnomówiący lub słuchawki. Kierowca musi jednak zachować pełną koncentrację.'
+            },
+            {
+                id: 4,
+                question_type: 'special',
+                question_pl: 'Jaka jest minimalna głębokość bieżnika opony zimowej dopuszczalna do użytkowania w Polsce?',
+                question_vi: 'Độ sâu gai lốp tối thiểu của lốp xe mùa đông được phép sử dụng ở Ba Lan là bao nhiêu?',
+                image_url: '',
+                option_a_pl: '1 mm',
+                option_a_vi: '1 mm',
+                option_b_pl: '3 mm',
+                option_b_vi: '3 mm',
+                option_c_pl: '4 mm',
+                option_c_vi: '4 mm',
+                correct_answer: 'B',
+                explanation_vi: 'Theo luật Ba Lan, lốp xe mùa đông phải có độ sâu gai tối thiểu 3mm. Đối với lốp thường, mức tối thiểu là 1.6mm.',
+                explanation_pl: 'Według polskich przepisów, minimalna głębokość bieżnika opony zimowej to 3 mm. Dla opon letnich i całorocznych minimalna głębokość wynosi 1,6 mm.'
+            },
+            {
+                id: 5,
+                question_type: 'basic',
+                question_pl: 'W jakiej odległości od znaku drogowego "stop" należy się zatrzymać?',
+                question_vi: 'Người lái xe phải dừng lại ở khoảng cách nào so với biển báo "Dừng lại"?',
+                image_url: '',
+                option_a_pl: 'Natychmiast przed znakiem',
+                option_a_vi: 'Ngay lập tức trước biển báo',
+                option_b_pl: 'Przed linią lub krawędzią jezdni',
+                option_b_vi: 'Trước vạch kẻ hoặc mép đường',
+                option_c_pl: 'W dowolnym miejscu za znakiem',
+                option_c_vi: 'Ở bất kỳ vị trí nào sau biển báo',
+                correct_answer: 'B',
+                explanation_vi: 'Người lái xe phải dừng lại hoàn toàn trước vạch dừng hoặc mép đường giao nhau, không phải ngay tại biển báo. Đây là quy định an toàn giao thông.',
+                explanation_pl: 'Kierowca musi zatrzymać pojazd całkowicie przed linią zatrzymania lub krawędzią jezdni skrzyżowania, a nie bezpośrednio przy znaku. To jest wymóg bezpieczeństwa.'
+            },
+            {
+                id: 6,
+                question_type: 'special',
+                question_pl: 'Przy jakiej prędkości wiatru zaleca się nie wyprzedzać dużych pojazdów ciężarowych na autostradzie?',
+                question_vi: 'Với tốc độ gió như thế nào thì khuyến cáo không nên vượt các phương tiện lớn trên đường cao tốc?',
+                image_url: '',
+                option_a_pl: 'Powyżej 50 km/h',
+                option_a_vi: 'Trên 50 km/h',
+                option_b_pl: 'Powyżej 70 km/h',
+                option_b_vi: 'Trên 70 km/h',
+                option_c_pl: 'Powyżej 90 km/h',
+                option_c_vi: 'Trên 90 km/h',
+                correct_answer: 'C',
+                explanation_vi: 'Khi tốc độ gió vượt quá 70 km/h, xe tải lớn có thể bị ảnh hưởng đáng kể bởi sức gió. Khuyến cáo không vượt khi gió trên 70 km/h để tránh mất ổn định.',
+                explanation_pl: 'Przy wietrze przekraczającym 70 km/h duże pojazdy ciężarowe są znacząco destabilizowane przez podmuchy wiatru. Zaleca się unikać wyprzedzania przy tak silnym wietrze.'
+            },
+            {
+                id: 7,
+                question_type: 'basic',
+                question_pl: 'Czy dozwolone jest cofanie pojazdu na autostradzie?',
+                question_vi: 'Có được phép lùi xe trên đường cao tốc không?',
+                image_url: '',
+                option_a_pl: 'Tak, ale tylko na krótkim odcinku',
+                option_a_vi: 'Có, nhưng chỉ trên một đoạn ngắn',
+                option_b_pl: 'Nie, cofanie jest zabronione',
+                option_b_vi: 'Không, lùi xe bị cấm',
+                option_c_pl: 'Tak, jeśli nie ma innej możliwości',
+                option_c_vi: 'Có, nếu không có lựa chọn nào khác',
+                correct_answer: 'B',
+                explanation_vi: 'Lùi xe trên đường cao tốc là hoàn toàn bị cấm. Nếu đi lạc đường, bạn phải tiếp tục đến lối ra gần nhất và quay lại.',
+                explanation_pl: 'Cofanie pojazdu na autostradzie jest surowo zabronione. Jeśli jedziesz złym kierunkiem, musisz kontynuować jazdę do najbliższego zjazdu i zawrócić.'
+            },
+            {
+                id: 8,
+                question_type: 'basic',
+                question_pl: 'Jakie są konsekwencje przekroczenia prędkości o więcej niż 50 km/h w obszarze zabudowanym?',
+                question_vi: 'Hậu quả của việc vượt tốc độ hơn 50 km/h trong khu vực đông dân cư là gì?',
+                image_url: '',
+                option_a_pl: 'Mandant w wysokości 500 zł i 10 punktów karnych',
+                option_a_vi: 'Phạt tiền 500 zł và 10 điểm phạt',
+                option_b_pl: 'Zatrzymanie prawa jazdy na 3 miesiące',
+                option_b_vi: 'Tước giấy phép lái xe 3 tháng',
+                option_c_pl: 'Grzywna i 15 punktów karnych oraz możliwość zatrzymania prawa jazdy',
+                option_c_vi: 'Phạt tiền và 15 điểm phạt, có thể bị tước giấy phép',
+                correct_answer: 'C',
+                explanation_vi: 'Vượt tốc độ hơn 50 km/h trong khu vực đông dân cư có thể bị phạt tới 15 điểm phạt và có thể bị tước giấy phép lái xe tạm thời.',
+                explanation_pl: 'Przekroczenie prędkości o więcej niż 50 km/h w obszarze zabudowanym może skutkować mandatem, 15 punktami karnymi oraz możliwością czasowego zatrzymania prawa jazdy.'
+            },
+            {
+                id: 9,
+                question_type: 'special',
+                question_pl: 'Ile metrów przed przejściem dla pieszych należy zatrzymać pojazd, aby ustąpić pierwszeństwa pieszemu?',
+                question_vi: 'Cần dừng xe cách vạch qua đường cho người đi bộ bao nhiêu mét để nhường đường cho người đi bộ?',
+                image_url: '',
+                option_a_pl: '1 metr',
+                option_a_vi: '1 mét',
+                option_b_pl: '3 metry',
+                option_b_vi: '3 mét',
+                option_c_pl: '5 metrów',
+                option_c_vi: '5 mét',
+                correct_answer: 'B',
+                explanation_vi: 'Theo luật giao thông Ba Lan, người lái xe phải dừng lại cách vạch qua đường cho người đi bộ ít nhất 3 mét để nhường đường cho người đi bộ đang đợi hoặc đang qua đường.',
+                explanation_pl: 'Zgodnie z polskim prawem, kierowca musi zatrzymać pojazd w odległości co najmniej 3 metrów od przejścia dla pieszych, aby ustąpić pierwszeństwa pieszemu czekającemu lub wchodzącemu na przejście.'
+            },
+            {
+                id: 10,
+                question_type: 'basic',
+                question_pl: 'Czy można zatrzymać się na autostradzie w sytuacji awarii pojazdu?',
+                question_vi: 'Có được phép dừng xe trên đường cao tốc khi xe bị hỏng không?',
+                image_url: '',
+                option_a_pl: 'Nie, nigdy nie wolno zatrzymywać się na autostradzie',
+                option_a_vi: 'Không, không bao giờ được dừng trên đường cao tốc',
+                option_b_pl: 'Tak, ale tylko w wyznaczonych miejscach awaryjnych',
+                option_b_vi: 'Có, nhưng chỉ ở những vị trí khẩn cấp được chỉ định',
+                option_c_pl: 'Tak, w dowolnym miejscu na prawym pasie',
+                option_c_vi: 'Có, ở bất kỳ vị trí nào trên làn phải',
+                correct_answer: 'B',
+                explanation_vi: 'Chỉ được dừng trên đường cao tốc trong trường hợp khẩn cấp và phải ở làn dừng khẩn cấp hoặc khu vực dừng khẩn cấp. Bạn phải bật đèn cảnh báo và đặt tam giác cảnh báo phía sau xe.',
+                explanation_pl: 'Na autostradzie można zatrzymać się tylko w nagłych przypadkach i wyłącznie na wyznaczonych miejscach awaryjnych lub pasie awaryjnym. Należy włączyć światła awaryjne i ustawić trójkąt ostrzegawczy za pojazdem.'
+            }
+        ];
+
         // State
         let sbClient = null;
         let questions = [];
@@ -465,6 +631,13 @@
             loadProgress();
             loadSettings();
             initNavigation();
+            // Load sample questions immediately (no Supabase needed)
+            questions = sampleQuestions;
+            progress.totalQuestions = questions.length;
+            updateProgressStats();
+            document.getElementById('lesson-loading').style.display = 'none';
+            document.getElementById('lesson-content').style.display = 'block';
+            displayLessonQuestion();
             switchLanguage('bilingual');
         });
 
@@ -590,12 +763,30 @@
         }
 
         // Load Questions
-        async function loadQuestions() {
-            if (!sbClient) return;
-
+        function loadQuestions() {
             document.getElementById('lesson-loading').style.display = 'flex';
             document.getElementById('lesson-content').style.display = 'none';
 
+            // If Supabase is connected, load from database
+            if (sbClient) {
+                loadFromSupabase();
+                return;
+            }
+
+            // Otherwise, load sample questions
+            questions = sampleQuestions;
+            progress.totalQuestions = questions.length;
+            saveProgress();
+            updateProgressStats();
+            
+            if (questions.length > 0) {
+                document.getElementById('lesson-loading').style.display = 'none';
+                document.getElementById('lesson-content').style.display = 'block';
+                displayLessonQuestion();
+            }
+        }
+
+        async function loadFromSupabase() {
             try {
                 const { data, error } = await sbClient.from('questions').select('*').order('id');
                 if (error) throw error;
@@ -704,11 +895,37 @@
                 updateProgressStats();
             }
             
+            // Show result message and explanation
             document.getElementById('lesson-explanation').style.display = 'block';
-            document.getElementById('explanation-text').textContent = q.explanation_vi || 'Không có giải thích.';
+            const explanationBox = document.getElementById('lesson-explanation');
+            const explanationTitle = document.querySelector('.explanation-title');
+            const explanationText = document.getElementById('explanation-text');
+            
+            if (isCorrect) {
+                explanationBox.classList.add('correct');
+                explanationBox.classList.remove('incorrect');
+                explanationTitle.textContent = currentLang === 'vi' ? 'Chinh xac!' : (currentLang === 'pl' ? 'Dokladnie!' : 'Chinh xac / Dokladnie!');
+                explanationTitle.style.color = 'var(--success)';
+                explanationText.textContent = getExplanationText(q);
+            } else {
+                explanationBox.classList.add('incorrect');
+                explanationBox.classList.remove('correct');
+                explanationTitle.textContent = currentLang === 'vi' ? 'Sai roi!' : (currentLang === 'pl' ? 'Zle!' : 'Sai roi / Zle!');
+                explanationTitle.style.color = 'var(--danger)';
+                explanationText.textContent = getExplanationText(q);
+            }
+            
             document.getElementById('btn-check').style.display = 'none';
             document.getElementById('btn-next').style.display = 'block';
-            document.getElementById('btn-next').textContent = currentLessonIndex < questions.length - 1 ? translations[currentLang].btn_next : '✓ ' + (currentLang === 'vi' ? 'Hoàn thành' : 'Ukończono');
+            document.getElementById('btn-next').textContent = currentLessonIndex < questions.length - 1 ? translations[currentLang].btn_next : (currentLang === 'vi' ? 'Hoan thanh' : 'Ukonczono');
+        }
+
+        function getExplanationText(q) {
+            if (viewMode === 'polish') return q.explanation_pl || q.explanation_vi || (currentLang === 'vi' ? 'Khong co giai thich.' : 'Brak wyjasnienia.');
+            if (viewMode === 'vietnamese') return q.explanation_vi || q.explanation_pl || (currentLang === 'vi' ? 'Khong co giai thich.' : 'Brak wyjasnienia.');
+            // Bilingual mode - show both
+            if (q.explanation_pl && q.explanation_vi) return q.explanation_pl + '\n\n' + q.explanation_vi;
+            return q.explanation_vi || q.explanation_pl || (currentLang === 'vi' ? 'Khong co giai thich.' : 'Brak wyjasnienia.');
         }
 
         function nextQuestion() {
