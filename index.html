@@ -1020,20 +1020,12 @@
                 }
             }
             
-            // Tạo ID duy nhất cho câu hỏi - dùng index trong mảng gốc
-            const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
-            const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${currentIndex}`;
-            
-            // Save progress - dùng questionKey thay vì index
+            // Lưu theo id trong mảng questions gốc (nhất quán khi chuyển filter)
             const isCorrect = letter === correct;
-            saveAnswer(questionKey, isCorrect, q.question_type);
-            
-            // Debug log
-            console.log('Saved:', questionKey, 'type:', q.question_type, 'idxInQuestions:', idxInQuestions, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
+            saveAnswer(q.id, isCorrect, q.question_type);
             
             // Cập nhật stats ngay sau khi trả lời
             updateProgressStats();
-            console.log('After update - answeredQuestions:', progress.answeredQuestions);
         }
 
         function prevQuestion() {
