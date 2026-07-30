@@ -856,8 +856,40 @@
             document.getElementById('learn-error-msg').textContent = msg;
         }
 
+        function filterCategory(type) {
+            currentFilter = type;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((type === 'all' && btn.textContent.includes('Tất cả')) ||
+                    (type === 'basic' && btn.textContent.includes('Cơ bản')) ||
+                    (type === 'special' && btn.textContent.includes('Chuyên'))) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Filter questions
+            if (type === 'all') {
+                filteredQuestions = [...questions];
+            } else {
+                filteredQuestions = questions.filter(q => q.question_type === type);
+            }
+            
+            // Reset to first question in filtered list
+            currentIndex = 0;
+            selectedAnswer = null;
+            
+            if (filteredQuestions.length > 0) {
+                renderQuestion();
+            } else {
+                document.getElementById('q-text').textContent = 'Không có câu hỏi nào trong danh mục này.';
+                document.getElementById('q-options').innerHTML = '';
+            }
+        }
+        
         function renderQuestion() {
-            const q = questions[currentIndex];
+            const q = filteredQuestions[currentIndex];
             const t = translations[currentLang];
             
             // Type badge
