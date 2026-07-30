@@ -940,8 +940,7 @@
             
             selectedOption = null;
             answerChecked = false;
-            document.getElementById('btn-check').style.display = 'block';
-            document.getElementById('btn-check').disabled = true;
+            document.getElementById('btn-check').style.display = 'none';
             document.getElementById('btn-next').style.display = 'none';
             document.getElementById('lesson-explanation').style.display = 'none';
         }
@@ -969,7 +968,7 @@
             document.querySelectorAll('#lesson-options .option').forEach(o => o.classList.remove('selected'));
             element.classList.add('selected');
             selectedOption = letter;
-            document.getElementById('btn-check').disabled = false;
+            checkAnswer();
         }
 
         function checkAnswer() {
@@ -1007,9 +1006,7 @@
                 explanationTitle.style.color = 'var(--success)';
                 explanationText.textContent = getExplanationText(q);
                 
-                // Auto-jump to next question after 1 second
-                document.getElementById('btn-check').style.display = 'none';
-                document.getElementById('btn-next').style.display = 'none';
+                // Auto-jump to next question after 1.5 seconds
                 setTimeout(() => {
                     if (currentLessonIndex < questions.length - 1) {
                         currentLessonIndex++;
@@ -1017,15 +1014,13 @@
                     } else {
                         alert(translations[currentLang].alert_completed);
                     }
-                }, 1000);
+                }, 1500);
             } else {
                 explanationBox.classList.add('incorrect');
                 explanationBox.classList.remove('correct');
                 explanationTitle.textContent = currentLang === 'vi' ? 'Sai roi!' : (currentLang === 'pl' ? 'Zle!' : 'Sai roi / Zle!');
                 explanationTitle.style.color = 'var(--danger)';
                 explanationText.textContent = getExplanationText(q);
-                
-                document.getElementById('btn-check').style.display = 'none';
                 document.getElementById('btn-next').style.display = 'block';
                 document.getElementById('btn-next').textContent = currentLessonIndex < questions.length - 1 ? translations[currentLang].btn_next : (currentLang === 'vi' ? 'Hoan thanh' : 'Ukonczono');
             }
