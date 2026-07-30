@@ -866,31 +866,19 @@
             
             // Update button states
             document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if ((type === 'all' && btn.textContent.includes('Tất cả')) ||
-                    (type === 'basic' && btn.textContent.includes('Cơ bản')) ||
-                    (type === 'special' && btn.textContent.includes('Chuyên'))) {
-                    btn.classList.add('active');
-                }
+                btn.classList.toggle('active', btn.dataset.filter === type);
             });
             
             // Filter questions
-            if (type === 'all') {
-                filteredQuestions = [...questions];
-            } else {
-                filteredQuestions = questions.filter(q => q.question_type === type);
-            }
+            filteredQuestions = type === 'all' 
+                ? [...questions] 
+                : questions.filter(q => q.question_type === type);
             
             // Reset to first question in filtered list
             currentIndex = 0;
             selectedAnswer = null;
             
-            if (filteredQuestions.length > 0) {
-                renderQuestion();
-            } else {
-                document.getElementById('q-text').textContent = 'Không có câu hỏi nào trong danh mục này.';
-                document.getElementById('q-options').innerHTML = '';
-            }
+            renderQuestion();
         }
         
         function renderQuestion() {
