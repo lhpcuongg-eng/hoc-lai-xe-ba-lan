@@ -575,9 +575,9 @@
                 </div>
                 <div id="learn-content" style="display:none;">
                     <div class="category-filter">
-                        <button class="filter-btn active" onclick="filterCategory('all')">Tất cả</button>
-                        <button class="filter-btn" onclick="filterCategory('basic')">Cơ bản</button>
-                        <button class="filter-btn" onclick="filterCategory('special')">Chuyên ngành</button>
+                        <button class="filter-btn active" data-filter="all" onclick="filterCategory('all')">Tất cả</button>
+                        <button class="filter-btn" data-filter="basic" onclick="filterCategory('basic')">Cơ bản</button>
+                        <button class="filter-btn" data-filter="special" onclick="filterCategory('special')">Chuyên ngành</button>
                     </div>
                     <div class="card">
                         <div class="question-header">
@@ -798,7 +798,10 @@
                 score: 'điểm',
                 vi_label: 'Tiếng Việt',
                 pl_label: 'Polski',
-                both_label: 'Song ngữ'
+                both_label: 'Song ngữ',
+                filter_all: 'Tất cả',
+                filter_basic: 'Cơ bản',
+                filter_special: 'Chuyên ngành'
             }
         };
 
@@ -836,6 +839,8 @@
                 const data = await response.json();
 
                 questions = data || [];
+                filteredQuestions = [...questions];
+                currentFilter = 'all';
                 
                 if (questions.length === 0) {
                     showError('Không có câu hỏi nào. Vui lòng thêm dữ liệu vào Supabase!');
@@ -980,7 +985,7 @@
         function selectOption(el, letter) {
             if (selectedAnswer) return;
             
-            const q = questions[currentIndex];
+            const q = filteredQuestions[currentIndex];
             const correct = (q.correct_answer || '').toUpperCase();
             selectedAnswer = letter;
             
