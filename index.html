@@ -836,7 +836,7 @@
                 const data = await response.json();
 
                 questions = data || [];
-                filteredQuestions = [...questions];
+                filteredQuestions = shuffle([...questions]);
                 currentFilter = 'all';
                 
                 if (questions.length === 0) {
@@ -858,6 +858,14 @@
             document.getElementById('learn-error-msg').textContent = msg;
         }
 
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
         function filterCategory(type) {
             currentFilter = type;
             
@@ -866,10 +874,10 @@
                 btn.classList.toggle('active', btn.dataset.filter === type);
             });
             
-            // Filter questions
+            // Filter questions and shuffle
             filteredQuestions = type === 'all' 
-                ? [...questions] 
-                : questions.filter(q => q.question_type === type);
+                ? shuffle([...questions]) 
+                : shuffle(questions.filter(q => q.question_type === type));
             
             // Reset to first question in filtered list
             currentIndex = 0;
@@ -1032,12 +1040,6 @@
                 selectedAnswer = null;
                 renderQuestion();
             }
-        }
-
-        function shuffleQuestions() {
-            questions = [...questions].sort(() => Math.random() - 0.5);
-            currentIndex = 0;
-            renderQuestion();
         }
 
         // Language
