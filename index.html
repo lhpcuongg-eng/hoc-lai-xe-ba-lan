@@ -2,1319 +2,152 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Học Lái Xe Ba Lan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Lái Xe Ba Lan - Test</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #3b82f6;
-            --primary-dark: #2563eb;
-            --primary-light: #60a5fa;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-light: #f8fafc;
-            --bg-white: #ffffff;
-            --bg-card: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border: #e2e8f0;
-            --shadow: 0 2px 8px rgba(0,0,0,0.08);
-            --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
-            --radius: 16px;
-            --radius-sm: 10px;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f0f4ff 0%, #fafbff 50%, #f0fdf4 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-        .container { max-width: 100%; padding: 12px; min-height: 100vh; display: flex; flex-direction: column; gap: 12px; }
-        .header { text-align: center; padding: 16px 0 12px; background: var(--bg-white); border-radius: var(--radius); box-shadow: var(--shadow); position: relative; }
-        .header h1 { font-size: 1.3rem; color: var(--primary); margin-bottom: 2px; font-weight: 700; }
-        .header-subtitle { font-size: 0.8rem; color: var(--text-secondary); }
-        .lang-switcher { display: flex; gap: 6px; justify-content: center; margin-top: 10px; }
-        .lang-switch { padding: 8px 14px; background: var(--bg-light); border: 1.5px solid var(--border); border-radius: 20px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .lang-switch.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
-        .lang-switch:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 0; }
-        .nav-tab {
-            flex: 1; padding: 12px 8px;
-            background: var(--bg-white); border: none;
-            border-radius: var(--radius-sm); color: var(--text-secondary);
-            font-size: 0.85rem; font-weight: 600; cursor: pointer;
-            transition: all 0.2s; text-align: center; white-space: nowrap;
-            box-shadow: var(--shadow);
-        }
-        .nav-tab.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
-        .nav-tab:hover:not(.active) { color: var(--primary); }
-        .main-content { flex: 1; display: flex; flex-direction: column; gap: 12px; padding-bottom: 20px; }
-        .section { display: none; flex-direction: column; flex: 1; min-height: 0; }
-        .section.active { display: flex; }
-        .card { background: var(--bg-card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-        .card-title { font-size: 1rem; margin-bottom: 12px; color: var(--text-primary); font-weight: 600; }
-        .progress-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .stat-card { background: var(--bg-light); border-radius: var(--radius-sm); padding: 14px 10px; text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
-        .stat-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
-        .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 12px; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); border-radius: 3px; transition: width 0.3s; }
-        .lesson-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .lesson-counter { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
-        .question-box { background: var(--bg-card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); }
-        .question-type { display: inline-block; padding: 4px 12px; background: var(--primary); border-radius: 20px; font-size: 0.7rem; margin-bottom: 10px; text-transform: uppercase; font-weight: 600; color: white; }
-        .question-type.basic { background: var(--primary); }
-        .question-type.special { background: #8b5cf6; }
-        .question-text { font-size: 1rem; line-height: 1.6; margin-bottom: 14px; white-space: pre-wrap; font-weight: 500; }
-        .question-image { max-width: 100%; border-radius: var(--radius-sm); margin-bottom: 14px; }
-        .options { display: flex; flex-direction: column; gap: 8px; }
-        .option { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--bg-light); border: 2px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
-        .option:hover:not(.disabled) { border-color: var(--primary); background: #eff6ff; }
-        .option.selected { border-color: var(--primary); background: #dbeafe; }
-        .option.correct { border-color: var(--success); background: #d1fae5; }
-        .option.incorrect { border-color: var(--danger); background: #fee2e2; }
-        .option.disabled { cursor: not-allowed; opacity: 0.75; }
-        .option-letter { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: var(--bg-white); border-radius: 50%; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .option.selected .option-letter { background: var(--primary); color: white; }
-        .option.correct .option-letter { background: var(--success); color: white; }
-        .option.incorrect .option-letter { background: var(--danger); color: white; }
-        .option-text { flex: 1; padding-top: 2px; font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; }
-        .btn { padding: 14px 20px; border: none; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; width: 100%; }
-        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-        .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
-        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1.5px solid var(--border); }
-        .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
-        .btn-group { display: flex; gap: 10px; margin-top: 12px; }
-        .btn-group .btn { flex: 1; }
-        .explanation { margin-top: 12px; padding: 14px; background: #eff6ff; border-left: 4px solid var(--primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
-        .explanation.correct { background: #d1fae5; border-left-color: var(--success); }
-        .explanation.incorrect { background: #fee2e2; border-left-color: var(--danger); }
-        .explanation-title { font-weight: 600; margin-bottom: 6px; font-size: 0.9rem; }
-        .explanation p { font-size: 0.9rem; line-height: 1.5; color: var(--text-primary); }
-        .timer { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px; background: var(--bg-white); border-radius: var(--radius-sm); margin-bottom: 12px; box-shadow: var(--shadow); }
-        .timer-value { font-size: 1.4rem; font-weight: 700; font-family: monospace; color: var(--primary); }
-        .timer-value.warning { color: var(--warning); }
-        .timer-value.danger { color: var(--danger); animation: pulse 0.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .result-card { text-align: center; padding: 24px 16px; }
-        .result-score { font-size: 3.5rem; font-weight: 700; margin-bottom: 8px; }
-        .result-score.pass { color: var(--success); }
-        .result-score.fail { color: var(--danger); }
-        .result-status { font-size: 1.1rem; margin-bottom: 20px; color: var(--text-secondary); }
-        .result-details { text-align: left; margin-bottom: 20px; }
-        .result-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        .result-item:last-child { border-bottom: none; }
-        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 14px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loading p { color: var(--text-secondary); font-size: 0.9rem; }
-        .quiz-start { text-align: center; padding: 20px 12px; }
-        .quiz-start h2 { margin-bottom: 12px; color: var(--primary); font-size: 1.2rem; }
-        .quiz-start > p { color: var(--text-secondary); margin-bottom: 16px; font-size: 0.85rem; line-height: 1.5; }
-        .quiz-info { background: var(--bg-light); border-radius: var(--radius-sm); padding: 14px; margin: 14px 0; text-align: left; }
-        .quiz-info h3 { margin-bottom: 10px; color: var(--primary); font-size: 0.9rem; }
-        .quiz-info ul { list-style: none; padding: 0; margin: 0; }
-        .quiz-info li { padding: 8px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.85rem; }
-        .quiz-info li:last-child { border-bottom: none; }
-        .quiz-info li span:first-child { color: var(--text-primary); }
-        .question-dots { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 12px; max-height: 120px; overflow-y: auto; }
-        .dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; background: var(--bg-light); border: 1.5px solid var(--border); color: var(--text-secondary); flex-shrink: 0; }
-        .dot.answered { background: var(--success); border-color: var(--success); color: white; }
-        .dot.current { background: var(--primary); border-color: var(--primary); color: white; }
-        .dot.wrong { background: var(--danger); border-color: var(--danger); color: white; }
-        .quiz-timer-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; }
-        @media (max-width: 380px) {
-            .container { padding: 8px; gap: 8px; }
-            .header { padding: 12px 0 10px; }
-            .header h1 { font-size: 1.15rem; }
-            .lang-switch { padding: 6px 10px; font-size: 0.7rem; }
-            .nav-tab { padding: 10px 6px; font-size: 0.8rem; }
-            .progress-stats { gap: 8px; }
-            .stat-card { padding: 10px 8px; }
-            .stat-value { font-size: 1.3rem; }
-            .question-box, .card { padding: 12px; }
-            .btn { padding: 12px 16px; }
-        }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        h1 { color: #3b82f6; text-align: center; }
+        .loading { text-align: center; padding: 50px; color: #666; }
+        .loading:after { content: '...'; animation: dots 1.5s infinite; }
+        @keyframes dots { 0%,20%{content:'.'} 40%{content:'..'} 60%,100%{content:'...'} }
+        .question { margin-top: 20px; }
+        .question-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+        .option { padding: 12px; margin: 8px 0; background: #f0f9ff; border-radius: 8px; cursor: pointer; }
+        .option:hover { background: #e0f2fe; }
+        .option.correct { background: #dcfce7; }
+        .option.wrong { background: #fee2e2; }
+        .btn { padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        .btn:disabled { background: #ccc; }
+        .error { color: red; padding: 20px; text-align: center; background: #fee2e2; border-radius: 8px; margin-top: 20px; }
+        .stats { text-align: center; margin-top: 20px; color: #666; }
+        .debug { background: #f0f0f0; padding: 10px; margin-top: 20px; font-size: 12px; word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1><span data-text="title">Học Lái Xe Ba Lan</span></h1>
-            <p class="header-subtitle" data-text="subtitle">Bài thi lý thuyết</p>
-            <div class="lang-switcher">
-                <button class="lang-switch" data-lang="vi" onclick="switchLanguage('vi')">Tiếng Việt</button>
-                <button class="lang-switch" data-lang="pl" onclick="switchLanguage('pl')">Polski</button>
-                <button class="lang-switch active" data-lang="bilingual" onclick="switchLanguage('bilingual')">Song ngữ</button>
-            </div>
-        </header>
-
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-tab="lesson" data-text="nav_lesson">Bài học</button>
-            <button class="nav-tab" data-tab="quiz" data-text="nav_quiz">Thi thử</button>
-            <button class="nav-tab" data-tab="progress" data-text="nav_progress">Tiến độ</button>
-        </nav>
-
-        <main class="main-content">
-            <!-- Lesson Section -->
-            <section id="lesson" class="section active">
-                <div class="lesson-header">
-                    <span class="lesson-counter"><span data-text="question_label">Câu</span> <span id="lesson-current">1</span> / <span id="lesson-total">0</span></span>
-                </div>
-
-                <div id="lesson-loading" class="loading">
-                    <div class="spinner"></div>
-                    <p data-text="loading">Đang tải câu hỏi...</p>
-                </div>
-
-                <div id="lesson-content" style="display: none;">
-                    <div class="question-box">
-                        <span id="question-type" class="question-type basic" data-text="type_basic">Cơ bản</span>
-                        <img id="question-image" class="question-image" style="display: none;">
-                        <p id="question-text" class="question-text"></p>
-                        <div class="options" id="lesson-options"></div>
-                        <div id="lesson-explanation" class="explanation" style="display: none;">
-                            <div class="explanation-title" data-text="explanation_title">Giải thích:</div>
-                            <p id="explanation-text"></p>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button id="btn-check" class="btn btn-primary" onclick="checkAnswer()" data-text="btn_check">Kiểm tra</button>
-                        <button id="btn-next" class="btn btn-success" onclick="nextQuestion()" style="display: none;" data-text="btn_next">Câu tiếp theo →</button>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-secondary" onclick="prevLessonQuestion()" data-text="btn_prev">← Câu trước</button>
-                        <button class="btn btn-secondary" onclick="shuffleQuestions()"><span data-text="btn_shuffle">Xáo trộn</span></button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Quiz Section -->
-            <section id="quiz" class="section">
-                <div id="quiz-start" class="quiz-start">
-                    <h2 style="margin-bottom: 16px;" data-text="quiz_title">Bài Thi Thử</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.85rem;" data-text="quiz_info">32 câu / 25 phút<br><span data-text="quiz_pass">Điểm đạt: 68/74</span></p>
-                    <div class="quiz-info">
-                        <h3 data-text="quiz_structure_title">Cấu trúc bài thi:</h3>
-                        <ul>
-                            <li><span data-text="quiz_basic">20 câu cơ bản (Đ/S)</span><span style="color: var(--primary);">44 điểm</span></li>
-                            <li><span data-text="quiz_special">12 câu chuyên ngành (A/B/C)</span><span style="color: var(--primary);">30 điểm</span></li>
-                            <li><span>25 phút</span><span style="color: var(--success);" data-text="quiz_pass_info">68+ để đạt</span></li>
-                        </ul>
-                    </div>
-                    <button class="btn btn-primary" onclick="startQuiz()" style="max-width: 300px; margin: 0 auto;"><span data-text="quiz_start">Bắt đầu thi</span></button>
-                </div>
-
-                <div id="quiz-content" style="display: none;">
-                    <div class="quiz-timer-info">
-                        <span><span data-text="quiz_total">Tổng:</span> <span id="total-time">25:00</span></span>
-                        <span><span data-text="quiz_question_time">Câu:</span> <span id="question-time">00:35</span></span>
-                    </div>
-                    <div class="timer">
-                        <span id="quiz-timer" class="timer-value">25:00</span>
-                    </div>
-                    <div class="question-dots" id="quiz-dots"></div>
-                    <div class="question-box">
-                        <span id="quiz-question-type" class="question-type basic" data-text="type_basic">Cơ bản</span>
-                        <span id="quiz-question-points" style="float: right; color: var(--primary); font-weight: 600;"></span>
-                        <img id="quiz-question-image" class="question-image" style="display: none;">
-                        <p id="quiz-question-text" class="question-text"></p>
-                        <div class="options" id="quiz-options"></div>
-                    </div>
-                    <div class="btn-group">
-                        <button id="btn-quiz-next" class="btn btn-primary" onclick="nextQuizQuestion()" disabled data-text="quiz_next">Câu tiếp theo →</button>
-                    </div>
-                    <div style="margin-top: 16px; text-align: center; color: var(--text-secondary);"><span data-text="quiz_progress">Câu</span> <span id="quiz-current">1</span> / 32</div>
-                </div>
-
-                <div id="quiz-result" class="result-card" style="display: none;">
-                    <h2 style="margin-bottom: 24px;" data-text="result_title">Kết quả bài thi</h2>
-                    <div class="result-score" id="result-score">0</div>
-                    <div class="result-status" id="result-status">Chưa hoàn thành</div>
-                    <div class="result-details">
-                        <div class="result-item"><span data-text="result_total">Tổng điểm</span><span id="result-total">0 / 74</span></div>
-                        <div class="result-item"><span data-text="result_pass">Điểm đạt</span><span>68</span></div>
-                        <div class="result-item"><span data-text="result_correct">Câu đúng</span><span id="result-correct">0 / 32</span></div>
-                        <div class="result-item"><span data-text="result_time">Thời gian</span><span id="result-time">--:--</span></div>
-                    </div>
-                    <button class="btn btn-primary" onclick="restartQuiz()" style="max-width: 200px; margin: 0 auto;" data-text="result_retry">Làm lại</button>
-                </div>
-            </section>
-
-            <!-- Progress Section -->
-            <section id="progress" class="section">
-                <div class="card">
-                    <h2 class="card-title" data-text="progress_title">Tiến độ học tập</h2>
-                    <div class="progress-stats">
-                        <div class="stat-card"><div class="stat-value" id="progress-total">0</div><div class="stat-label" data-text="progress_total">Tổng câu hỏi</div></div>
-                        <div class="stat-card"><div class="stat-value" id="progress-answered">0</div><div class="stat-label" data-text="progress_answered">Đã trả lời</div></div>
-                        <div class="stat-card"><div class="stat-value" id="progress-correct">0%</div><div class="stat-label" data-text="progress_correct">Tỷ lệ đúng</div></div>
-                        <div class="stat-card"><div class="stat-value" id="progress-best">0 điểm</div><div class="stat-label" data-text="progress_best">Điểm cao nhất</div></div>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width: 0%;"></div></div>
-                    <p style="text-align: center; margin-top: 8px; color: var(--text-secondary); font-size: 0.85rem;"><span id="progress-percent">0</span>% <span data-text="progress_complete">hoàn thành</span></p>
-                </div>
-                <div class="card">
-                    <h2 class="card-title" data-text="progress_detail_title">Thống kê chi tiết</h2>
-                    <div class="result-details">
-                        <div class="result-item"><span data-text="progress_basic">Câu cơ bản đã học</span><span id="stat-basic-learned">0 / 20</span></div>
-                        <div class="result-item"><span data-text="progress_special">Câu chuyên ngành đã học</span><span id="stat-special-learned">0 / 12</span></div>
-                        <div class="result-item"><span data-text="progress_quiz_count">Số lần thi</span><span id="stat-quiz-count">0</span></div>
-                        <div class="result-item"><span data-text="progress_last_date">Ngày học gần nhất</span><span id="stat-last-date">--</span></div>
-                    </div>
-                </div>
-                <button class="btn btn-secondary" onclick="resetProgress()"><span data-text="progress_reset">Xóa tiến độ</span></button>
-            </section>
-        </main>
+        <h1>Học Lái Xe Ba Lan</h1>
+        <div id="app"></div>
     </div>
 
     <script>
-        // Translations
-        const translations = {
-            vi: {
-                title: 'Học Lái Xe Ba Lan',
-                subtitle: 'Bài thi lý thuyết',
-                nav_lesson: 'Bài học',
-                nav_quiz: 'Thi thử',
-                nav_progress: 'Tiến độ',
-                question_label: 'Câu',
-                loading: 'Đang tải câu hỏi...',
-                type_basic: 'Cơ bản',
-                type_special: 'Chuyên ngành',
-                explanation_title: 'Giải thích:',
-                btn_check: 'Kiểm tra',
-                btn_next: 'Câu tiếp theo →',
-                btn_prev: '← Câu trước',
-                btn_shuffle: 'Xáo trộn',
-                quiz_title: 'Bài Thi Thử',
-                quiz_info: '32 câu hỏi trong 25 phút<br><span>Điểm đạt: 68/74</span>',
-                quiz_pass: 'Điểm đạt: 68/74',
-                quiz_structure_title: 'Cấu trúc bài thi:',
-                quiz_basic: '20 câu cơ bản (Đ/S) - 44 điểm',
-                quiz_special: '12 câu chuyên ngành (A/B/C) - 30 điểm',
-                quiz_pass_info: '68+ để đạt',
-                quiz_start: 'Bắt đầu thi',
-                quiz_total: 'Tổng:',
-                quiz_question_time: 'Câu:',
-                quiz_next: 'Câu tiếp theo →',
-                quiz_progress: 'Câu',
-                quiz_result: 'Xem kết quả',
-                result_title: 'Kết quả bài thi',
-                result_total: 'Tổng điểm',
-                result_pass: 'Điểm đạt',
-                result_correct: 'Câu đúng',
-                result_time: 'Thời gian',
-                result_retry: 'Làm lại',
-                progress_title: 'Tiến độ học tập',
-                progress_total: 'Tổng câu hỏi',
-                progress_answered: 'Đã trả lời',
-                progress_correct: 'Tỷ lệ đúng',
-                progress_best: 'Điểm cao nhất',
-                progress_complete: 'hoàn thành',
-                progress_detail_title: 'Thống kê chi tiết',
-                progress_basic: 'Câu cơ bản đã học',
-                progress_special: 'Câu chuyên ngành đã học',
-                progress_quiz_count: 'Số lần thi',
-                progress_last_date: 'Ngày học gần nhất',
-                progress_reset: 'Xóa tiến độ',
-                alert_need_questions: 'Cần ít nhất 32 câu hỏi. Hiện tại: ',
-                alert_no_questions: 'Chưa có câu hỏi. Vui lòng thêm dữ liệu vào Supabase.',
-                alert_completed: 'Bạn đã hoàn thành tất cả câu hỏi!',
-                alert_reset_progress: 'Xóa toàn bộ tiến độ?',
-                alert_need_more: ' câu.'
-            },
-            bilingual: {
-                title: 'Học Lái Xe - Song ngữ',
-                subtitle: 'Bài thi lý thuyết',
-                nav_lesson: 'Bài học / Lekcja',
-                nav_quiz: 'Thi thử / Test',
-                nav_progress: 'Tiến độ / Postęp',
-                question_label: 'Câu / Pytanie',
-                loading: 'Đang tải / Ładowanie...',
-                type_basic: 'Cơ bản / Podstawowe',
-                type_special: 'Chuyên ngành / Specjalistyczne',
-                explanation_title: 'Giải thích: / Wyjaśnienie:',
-                btn_check: 'Kiểm tra / Sprawdź',
-                btn_next: 'Tiếp theo → / Następne →',
-                btn_prev: '← Trước / ← Poprzednie',
-                btn_shuffle: 'Xáo trộn / Losuj',
-                quiz_title: 'Bài Thi Thử / Próbny Egzamin',
-                quiz_info: '32 câu / 25 phút<br><span>Điểm đạt: 68/74</span>',
-                quiz_pass: 'Điểm đạt: 68/74',
-                quiz_structure_title: 'Cấu trúc / Struktura:',
-                quiz_basic: '20 câu cơ bản (Đ/S) / 20 pytań podstawowych (T/N)',
-                quiz_special: '12 câu chuyên ngành (A/B/C) / 12 pytań specjalistycznych',
-                quiz_pass_info: '68+ để đạt / do zaliczenia',
-                quiz_start: 'Bắt đầu / Rozpocznij',
-                quiz_total: 'Tổng: / Razem:',
-                quiz_question_time: 'Câu: / Pytanie:',
-                quiz_next: 'Tiếp theo → / Następne →',
-                quiz_progress: 'Câu / Pytanie',
-                quiz_result: 'Kết quả / Wyniki',
-                result_title: 'Kết quả / Wynik egzaminu',
-                result_total: 'Tổng điểm / Wynik całkowity',
-                result_pass: 'Điểm đạt / Wynik zaliczeniowy',
-                result_correct: 'Câu đúng / Poprawne',
-                result_time: 'Thời gian / Czas',
-                result_retry: 'Làm lại / Spróbuj ponownie',
-                progress_title: 'Tiến độ / Postęp nauki',
-                progress_total: 'Tổng câu / Wszystkie pytania',
-                progress_answered: 'Đã trả lời / Odpowiedziano',
-                progress_correct: 'Tỷ lệ đúng / Wynik poprawny',
-                progress_best: 'Điểm cao nhất / Najlepszy wynik',
-                progress_complete: 'hoàn thành / ukończono',
-                progress_detail_title: 'Thống kê / Statystyki',
-                progress_basic: 'Câu cơ bản / Pytania podstawowe',
-                progress_special: 'Câu chuyên ngành / Pytania specjalistyczne',
-                progress_quiz_count: 'Số lần thi / Liczba egzaminów',
-                progress_last_date: 'Ngày học gần nhất / Ostatnia nauka',
-                progress_reset: 'Xóa tiến độ / Reset postępu',
-                alert_need_questions: 'Cần 32 câu. Hiện tại: / Potrzeba 32 pytań. Aktualnie: ',
-                alert_no_questions: 'Chưa có câu hỏi. / Brak pytań.',
-                alert_completed: 'Hoàn thành! / Ukończono!',
-                alert_reset_progress: 'Xóa tiến độ? / Usunąć postęp?',
-                alert_need_more: ' câu. / pytań.'
-            },
-            pl: {
-                title: 'Nauka Jazdy - Polska',
-                subtitle: 'Egzamin teoretyczny',
-                nav_lesson: 'Lekcja',
-                nav_quiz: 'Test',
-                nav_progress: 'Postęp',
-                question_label: 'Pytanie',
-                loading: 'Ładowanie pytań...',
-                type_basic: 'Podstawowe',
-                type_special: 'Specjalistyczne',
-                explanation_title: 'Wyjaśnienie:',
-                btn_check: 'Sprawdź',
-                btn_next: 'Następne pytanie →',
-                btn_prev: '← Poprzednie',
-                btn_shuffle: 'Losuj',
-                quiz_title: 'Próbny Egzamin',
-                quiz_info: '32 pytania w 25 minut<br><span>Wynik do zaliczenia: 68/74</span>',
-                quiz_pass: 'Wynik do zaliczenia: 68/74',
-                quiz_structure_title: 'Struktura egzaminu:',
-                quiz_basic: '20 pytań podstawowych (T/N) - 44 pkt',
-                quiz_special: '12 pytań specjalistycznych (A/B/C) - 30 pkt',
-                quiz_pass_info: '68+ do zaliczenia',
-                quiz_start: 'Rozpocznij egzamin',
-                quiz_total: 'Razem:',
-                quiz_question_time: 'Pytanie:',
-                quiz_next: 'Następne pytanie →',
-                quiz_progress: 'Pytanie',
-                quiz_result: 'Zobacz wyniki',
-                result_title: 'Wynik egzaminu',
-                result_total: 'Wynik całkowity',
-                result_pass: 'Wynik zaliczeniowy',
-                result_correct: 'Poprawne odpowiedzi',
-                result_time: 'Czas',
-                result_retry: 'Spróbuj ponownie',
-                progress_title: 'Postęp nauki',
-                progress_total: 'Wszystkie pytania',
-                progress_answered: 'Odpowiedziano',
-                progress_correct: 'Wynik poprawny',
-                progress_best: 'Najlepszy wynik',
-                progress_complete: 'ukończono',
-                progress_detail_title: 'Statystyki szczegółowe',
-                progress_basic: 'Pytania podstawowe',
-                progress_special: 'Pytania specjalistyczne',
-                progress_quiz_count: 'Liczba egzaminów',
-                progress_last_date: 'Ostatnia nauka',
-                progress_reset: 'Reset postępu',
-                alert_need_questions: 'Potrzeba co najmniej 32 pytań. Aktualnie: ',
-                alert_no_questions: 'Brak pytań. Dodaj dane do Supabase.',
-                alert_completed: 'Ukończyłeś wszystkie pytania!',
-                alert_reset_progress: 'Usunąć cały postęp?',
-                alert_need_more: ' pytań.'
-            }
-        };
-
-        // Sample Questions (Fallback when no Supabase data)
-        const sampleQuestions = [
-            {
-                id: 1,
-                question_type: 'basic',
-                question_pl: 'Czy na skrzyżowaniu dróg o ruchu okrężnym (rondo) ustępuje się pierwszeństwa pojazdom nadjeżdżającym z prawej strony?',
-                question_vi: 'Tại ngã tư vòng xuyến (bùng binh), xe nào có quyền ưu tiên?',
-                image_url: '',
-                option_a_pl: 'Tak, zawsze ustępuje się pierwszeństwa pojazdom z prawej strony',
-                option_a_vi: 'Đúng, luôn nhường đường cho xe từ bên phải',
-                option_b_pl: 'Nie, na rondzie pierwszeństwo mają pojazdy już znajdujące się na rondzie',
-                option_b_vi: 'Sai, tại bùng binh xe đã ở trên bùng binh có quyền ưu tiên',
-                option_c_pl: 'Zależy od wielkości ronda',
-                option_c_vi: 'Tùy thuộc vào kích thước bùng binh',
-                correct_answer: 'B',
-                explanation_vi: 'Tại bùng binh, xe đã đang ở trên bùng binh có quyền ưu tiên. Xe entering phải nhường đường cho xe đang di chuyển trên bùng binh.',
-                explanation_pl: 'Na rondzie pierwszeństwo mają pojazdy już znajdujące się na skrzyżowaniu okrężnym. Pojazdy wjeżdżające na rondo muszą ustąpić pierwszeństwa.'
-            },
-            {
-                id: 2,
-                question_type: 'basic',
-                question_pl: 'Z jaką maksymalną prędkością może poruszać się samochód osobowy na autostradzie w Polsce?',
-                question_vi: 'Tốc độ tối đa cho phép của ô tô con trên đường cao tốc ở Ba Lan là bao nhiêu?',
-                image_url: '',
-                option_a_pl: '100 km/h',
-                option_a_vi: '100 km/h',
-                option_b_pl: '140 km/h',
-                option_b_vi: '140 km/h',
-                option_c_pl: '130 km/h',
-                option_c_vi: '130 km/h',
-                correct_answer: 'C',
-                explanation_vi: 'Theo luật giao thông Ba Lan, tốc độ tối đa trên đường cao tốc đối với ô tô con là 130 km/h (tốc độ được khuyến nghị là 120 km/h).',
-                explanation_pl: 'Zgodnie z polskim prawem o ruchu drogowym, maksymalna prędkość dla samochodów osobowych na autostradzie wynosi 130 km/h (zalecana to 120 km/h).'
-            },
-            {
-                id: 3,
-                question_type: 'basic',
-                question_pl: 'Czy kierowca może rozmawiać przez telefon komórkowy podczas jazdy, jeśli używa zestawu głośnomówiącego?',
-                question_vi: 'Người lái xe có được phép nghe điện thoại khi đang lái xe không?',
-                image_url: '',
-                option_a_pl: 'Tak, ale tylko w przypadku używania zestawu głośnomówiącego lub słuchawek',
-                option_a_vi: 'Có, nhưng chỉ khi sử dụng thiết bị rảnh tay hoặc tai nghe',
-                option_b_pl: 'Nie, rozmowa przez telefon jest zawsze zabroniona podczas jazdy',
-                option_b_vi: 'Không, nói chuyện qua điện thoại luôn bị cấm khi đang lái xe',
-                option_c_pl: 'Tak, bez żadnych ograniczeń',
-                option_c_vi: 'Có, không có giới hạn nào',
-                correct_answer: 'A',
-                explanation_vi: 'Sử dụng điện thoại khi lái xe chỉ được phép khi sử dụng thiết bị rảnh tay (hands-free) hoặc tai nghe không dây, nhưng bạn vẫn phải cầm lái cẩn thận.',
-                explanation_pl: 'Korzystanie z telefonu podczas jazdy jest dozwolone tylko wtedy, gdy używany jest zestaw głośnomówiący lub słuchawki. Kierowca musi jednak zachować pełną koncentrację.'
-            },
-            {
-                id: 4,
-                question_type: 'special',
-                question_pl: 'Jaka jest minimalna głębokość bieżnika opony zimowej dopuszczalna do użytkowania w Polsce?',
-                question_vi: 'Độ sâu gai lốp tối thiểu của lốp xe mùa đông được phép sử dụng ở Ba Lan là bao nhiêu?',
-                image_url: '',
-                option_a_pl: '1 mm',
-                option_a_vi: '1 mm',
-                option_b_pl: '3 mm',
-                option_b_vi: '3 mm',
-                option_c_pl: '4 mm',
-                option_c_vi: '4 mm',
-                correct_answer: 'B',
-                explanation_vi: 'Theo luật Ba Lan, lốp xe mùa đông phải có độ sâu gai tối thiểu 3mm. Đối với lốp thường, mức tối thiểu là 1.6mm.',
-                explanation_pl: 'Według polskich przepisów, minimalna głębokość bieżnika opony zimowej to 3 mm. Dla opon letnich i całorocznych minimalna głębokość wynosi 1,6 mm.'
-            },
-            {
-                id: 5,
-                question_type: 'basic',
-                question_pl: 'W jakiej odległości od znaku drogowego "stop" należy się zatrzymać?',
-                question_vi: 'Người lái xe phải dừng lại ở khoảng cách nào so với biển báo "Dừng lại"?',
-                image_url: '',
-                option_a_pl: 'Natychmiast przed znakiem',
-                option_a_vi: 'Ngay lập tức trước biển báo',
-                option_b_pl: 'Przed linią lub krawędzią jezdni',
-                option_b_vi: 'Trước vạch kẻ hoặc mép đường',
-                option_c_pl: 'W dowolnym miejscu za znakiem',
-                option_c_vi: 'Ở bất kỳ vị trí nào sau biển báo',
-                correct_answer: 'B',
-                explanation_vi: 'Người lái xe phải dừng lại hoàn toàn trước vạch dừng hoặc mép đường giao nhau, không phải ngay tại biển báo. Đây là quy định an toàn giao thông.',
-                explanation_pl: 'Kierowca musi zatrzymać pojazd całkowicie przed linią zatrzymania lub krawędzią jezdni skrzyżowania, a nie bezpośrednio przy znaku. To jest wymóg bezpieczeństwa.'
-            },
-            {
-                id: 6,
-                question_type: 'special',
-                question_pl: 'Przy jakiej prędkości wiatru zaleca się nie wyprzedzać dużych pojazdów ciężarowych na autostradzie?',
-                question_vi: 'Với tốc độ gió như thế nào thì khuyến cáo không nên vượt các phương tiện lớn trên đường cao tốc?',
-                image_url: '',
-                option_a_pl: 'Powyżej 50 km/h',
-                option_a_vi: 'Trên 50 km/h',
-                option_b_pl: 'Powyżej 70 km/h',
-                option_b_vi: 'Trên 70 km/h',
-                option_c_pl: 'Powyżej 90 km/h',
-                option_c_vi: 'Trên 90 km/h',
-                correct_answer: 'C',
-                explanation_vi: 'Khi tốc độ gió vượt quá 70 km/h, xe tải lớn có thể bị ảnh hưởng đáng kể bởi sức gió. Khuyến cáo không vượt khi gió trên 70 km/h để tránh mất ổn định.',
-                explanation_pl: 'Przy wietrze przekraczającym 70 km/h duże pojazdy ciężarowe są znacząco destabilizowane przez podmuchy wiatru. Zaleca się unikać wyprzedzania przy tak silnym wietrze.'
-            },
-            {
-                id: 7,
-                question_type: 'basic',
-                question_pl: 'Czy dozwolone jest cofanie pojazdu na autostradzie?',
-                question_vi: 'Có được phép lùi xe trên đường cao tốc không?',
-                image_url: '',
-                option_a_pl: 'Tak, ale tylko na krótkim odcinku',
-                option_a_vi: 'Có, nhưng chỉ trên một đoạn ngắn',
-                option_b_pl: 'Nie, cofanie jest zabronione',
-                option_b_vi: 'Không, lùi xe bị cấm',
-                option_c_pl: 'Tak, jeśli nie ma innej możliwości',
-                option_c_vi: 'Có, nếu không có lựa chọn nào khác',
-                correct_answer: 'B',
-                explanation_vi: 'Lùi xe trên đường cao tốc là hoàn toàn bị cấm. Nếu đi lạc đường, bạn phải tiếp tục đến lối ra gần nhất và quay lại.',
-                explanation_pl: 'Cofanie pojazdu na autostradzie jest surowo zabronione. Jeśli jedziesz złym kierunkiem, musisz kontynuować jazdę do najbliższego zjazdu i zawrócić.'
-            },
-            {
-                id: 8,
-                question_type: 'basic',
-                question_pl: 'Jakie są konsekwencje przekroczenia prędkości o więcej niż 50 km/h w obszarze zabudowanym?',
-                question_vi: 'Hậu quả của việc vượt tốc độ hơn 50 km/h trong khu vực đông dân cư là gì?',
-                image_url: '',
-                option_a_pl: 'Mandant w wysokości 500 zł i 10 punktów karnych',
-                option_a_vi: 'Phạt tiền 500 zł và 10 điểm phạt',
-                option_b_pl: 'Zatrzymanie prawa jazdy na 3 miesiące',
-                option_b_vi: 'Tước giấy phép lái xe 3 tháng',
-                option_c_pl: 'Grzywna i 15 punktów karnych oraz możliwość zatrzymania prawa jazdy',
-                option_c_vi: 'Phạt tiền và 15 điểm phạt, có thể bị tước giấy phép',
-                correct_answer: 'C',
-                explanation_vi: 'Vượt tốc độ hơn 50 km/h trong khu vực đông dân cư có thể bị phạt tới 15 điểm phạt và có thể bị tước giấy phép lái xe tạm thời.',
-                explanation_pl: 'Przekroczenie prędkości o więcej niż 50 km/h w obszarze zabudowanym może skutkować mandatem, 15 punktami karnymi oraz możliwością czasowego zatrzymania prawa jazdy.'
-            },
-            {
-                id: 9,
-                question_type: 'special',
-                question_pl: 'Ile metrów przed przejściem dla pieszych należy zatrzymać pojazd, aby ustąpić pierwszeństwa pieszemu?',
-                question_vi: 'Cần dừng xe cách vạch qua đường cho người đi bộ bao nhiêu mét để nhường đường cho người đi bộ?',
-                image_url: '',
-                option_a_pl: '1 metr',
-                option_a_vi: '1 mét',
-                option_b_pl: '3 metry',
-                option_b_vi: '3 mét',
-                option_c_pl: '5 metrów',
-                option_c_vi: '5 mét',
-                correct_answer: 'B',
-                explanation_vi: 'Theo luật giao thông Ba Lan, người lái xe phải dừng lại cách vạch qua đường cho người đi bộ ít nhất 3 mét để nhường đường cho người đi bộ đang đợi hoặc đang qua đường.',
-                explanation_pl: 'Zgodnie z polskim prawem, kierowca musi zatrzymać pojazd w odległości co najmniej 3 metrów od przejścia dla pieszych, aby ustąpić pierwszeństwa pieszemu czekającemu lub wchodzącemu na przejście.'
-            },
-            {
-                id: 10,
-                question_type: 'basic',
-                question_pl: 'Czy można zatrzymać się na autostradzie w sytuacji awarii pojazdu?',
-                question_vi: 'Có được phép dừng xe trên đường cao tốc khi xe bị hỏng không?',
-                image_url: '',
-                option_a_pl: 'Nie, nigdy nie wolno zatrzymywać się na autostradzie',
-                option_a_vi: 'Không, không bao giờ được dừng trên đường cao tốc',
-                option_b_pl: 'Tak, ale tylko w wyznaczonych miejscach awaryjnych',
-                option_b_vi: 'Có, nhưng chỉ ở những vị trí khẩn cấp được chỉ định',
-                option_c_pl: 'Tak, w dowolnym miejscu na prawym pasie',
-                option_c_vi: 'Có, ở bất kỳ vị trí nào trên làn phải',
-                correct_answer: 'B',
-                explanation_vi: 'Chỉ được dừng trên đường cao tốc trong trường hợp khẩn cấp và phải ở làn dừng khẩn cấp hoặc khu vực dừng khẩn cấp. Bạn phải bật đèn cảnh báo và đặt tam giác cảnh báo phía sau xe.',
-                explanation_pl: 'Na autostradzie można zatrzymać się tylko w nagłych przypadkach i wyłącznie na wyznaczonych miejscach awaryjnych lub pasie awaryjnym. Należy włączyć światła awaryjne i ustawić trójkąt ostrzegawczy za pojazdem.'
-            },
-            {
-                id: 11,
-                question_type: 'basic',
-                question_pl: 'Co oznacza znak drogowy przedstawiony na zdjęciu (okrągły niebieski z białym samochodem)?',
-                question_vi: 'Biển báo tròn màu xanh dương có hình ô tô trắng ở giữa có nghĩa là gì?',
-                image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Polish_road_sign_P42.svg/240px-Polish_road_sign_P42.svg.png',
-                option_a_pl: 'Droga ekspresowa',
-                option_a_vi: 'Đường cao tốc',
-                option_b_pl: 'Autostrada',
-                option_b_vi: 'Đường cao tốc đặc biệt',
-                option_c_pl: 'Droga główna',
-                option_c_vi: 'Đường chính',
-                correct_answer: 'B',
-                explanation_vi: 'Biển báo P42 (đường cao tốc đặc biệt) là biển báo tròn màu xanh dương với hình ô tô trắng. Nó báo hiệu đường cao tốc đặc biệt dành cho ô tô.',
-                explanation_pl: 'Znak P42 (autostrada) to okrągły niebieski znak z białym samochodem. Oznacza drogę główną przeznaczoną wyłącznie dla samochodów.'
-            },
-            {
-                id: 12,
-                question_type: 'special',
-                question_pl: 'Ile wynosi minimalna odległość między pojazdami na autostradzie według polskich przepisów?',
-                question_vi: 'Khoảng cách tối thiểu giữa các phương tiện trên đường cao tốc theo luật Ba Lan là bao nhiêu?',
-                image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Polish_road_sign_T-12.svg/240px-Polish_road_sign_T-12.svg.png',
-                option_a_pl: '20 metrów',
-                option_a_vi: '20 mét',
-                option_b_pl: 'Odległość umożliwiająca bezpieczne zatrzymanie',
-                option_b_vi: 'Khoảng cách đủ để dừng an toàn',
-                option_c_pl: '50 metrów',
-                option_c_vi: '50 mét',
-                correct_answer: 'B',
-                explanation_vi: 'Theo luật Ba Lan, không có quy định khoảng cách cố định tối thiểu, nhưng bạn phải giữ khoảng cách đủ để dừng xe an toàn trong trường hợp phanh gấp.',
-                explanation_pl: 'Polskie przepisy nie określają stałej minimalnej odległości, ale kierowca musi utrzymywać odległość umożliwiającą bezpieczne zatrzymanie pojazdu w razie nagłego hamowania.'
-            },
-            {
-                id: 13,
-                question_type: 'basic',
-                question_pl: 'Co oznacza znak trójkątny z czerwoną obwódką i samochodem w środku?',
-                question_vi: 'Biển báo hình tam giác viền đỏ có hình ô tô ở giữa có nghĩa là gì?',
-                image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Polish_road_sign_T-1a.svg/240px-Polish_road_sign_T-1a.svg.png',
-                option_a_pl: 'Ostrzeżenie o niebezpieczeństwie',
-                option_a_vi: 'Cảnh báo về nguy hiểm',
-                option_b_pl: 'Ustąp pierwszeństwa innym uczestnikom ruchu',
-                option_b_vi: 'Nhường đường cho người tham gia giao thông khác',
-                option_c_pl: 'Zakaz wjazdu',
-                option_c_vi: 'Cấm đi vào',
-                correct_answer: 'B',
-                explanation_vi: 'Biển báo T-1a là biển báo cảnh báo hình tam giác viền đỏ có hình phương tiện. Nó yêu cầu người lái xe nhường đường cho tất cả phương tiện trên đường chính.',
-                explanation_pl: 'Znak T-1a to trójkątny znak ostrzegawczy z pojazdem. Oznacza, że kierowca musi ustąpić pierwszeństwa wszystkim pojazdom znajdującym się na drodze z pierwszeństwem.'
-            },
-            {
-                id: 14,
-                question_type: 'special',
-                question_pl: 'Przy jakiej widoczności (w metrach) należy włączyć światła przeciwmgielne przednie?',
-                question_vi: 'Khi tầm nhìn bị giảm xuống bao nhiêu mét thì phải bật đèn sương mù trước?',
-                image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Polish_road_sign_T-12.svg/240px-Polish_road_sign_T-12.svg.png',
-                option_a_pl: 'Poniżej 50 metrów',
-                option_a_vi: 'Dưới 50 mét',
-                option_b_pl: 'Poniżej 100 metrów',
-                option_b_vi: 'Dưới 100 mét',
-                option_c_pl: 'Poniżej 200 metrów',
-                option_c_vi: 'Dưới 200 mét',
-                correct_answer: 'B',
-                explanation_vi: 'Theo luật Ba Lan, đèn sương mù trước phải được bật khi tầm nhìn giảm xuống dưới 100 mét do sương mù, mưa hoặc tuyết.',
-                explanation_pl: 'Zgodnie z polskimi przepisami, światła przeciwmgielne przednie należy włączyć, gdy widoczność spada poniżej 100 metrów z powodu mgły, deszczu lub śniegu.'
-            },
-            {
-                id: 15,
-                question_type: 'basic',
-                question_pl: 'Co oznacza znak okrągły z czerwonym okręgiem i przekreśloną białą strzałką skierowaną w lewo?',
-                question_vi: 'Biển báo tròn có vòng tròn đỏ và mũi tên trắng chỉ sang trái bị gạch ngang có nghĩa là gì?',
-                image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Polish_road_sign_B-2.svg/240px-Polish_road_sign_B-2.svg.png',
-                option_a_pl: 'Zakaz skręcania w lewo',
-                option_a_vi: 'Cấm rẽ trái',
-                option_b_pl: 'Zakaz zawracania',
-                option_b_vi: 'Cấm quay đầu xe',
-                option_c_pl: 'Zakaz wjazdu',
-                option_c_vi: 'Cấm đi vào',
-                correct_answer: 'B',
-                explanation_vi: 'Biển báo B-2 là biển cấm quay đầu xe. Vòng tròn đỏ với mũi tên bị gạch ngang có nghĩa là không được phép quay đầu xe tại vị trí đó.',
-                explanation_pl: 'Znak B-2 to znak zakazu zawracania. Czerwone koło z przekreśloną strzałką oznacza, że zawracanie jest zabronione w danym miejscu.'
-            }
-        ];
-
-        // State
-        let sbClient = null;
-        let questions = [];
-        let currentLessonIndex = 0;
-        let currentQuizIndex = 0;
-        let quizQuestions = [];
-        let quizAnswers = [];
-        let quizStartTime = null;
-        let totalTimer = null;
-        let questionTimer = null;
-        let selectedOption = null;
-        let answerChecked = false;
-        let currentLang = 'vi';
-        let viewMode = 'bilingual';
-
-        // Progress
-        let progress = {
-            totalQuestions: 0,
-            answeredQuestions: [],
-            correctAnswers: [],
-            quizBestScore: 0,
-            quizCount: 0,
-            lastStudyDate: null,
-            basicLearned: 0,
-            specialLearned: 0
-        };
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProgress();
-            loadSettings();
-            initNavigation();
-            // Initialize Supabase connection if configured
-            initSupabase();
-            switchLanguage('bilingual');
-        });
-
-        // Language switching
-        function switchLanguage(lang) {
-            currentLang = lang;
-            localStorage.setItem('app_lang', lang);
-            
-            document.querySelectorAll('.lang-switch').forEach(btn => {
-                btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
-            });
-            
-            const t = translations[lang];
-            
-            // Update header
-            document.querySelector('[data-text="title"]').textContent = t.title;
-            document.querySelector('[data-text="subtitle"]').textContent = t.subtitle;
-            
-            // Update nav tabs
-            document.querySelector('[data-text="nav_lesson"]').textContent = t.nav_lesson;
-            document.querySelector('[data-text="nav_quiz"]').textContent = t.nav_quiz;
-            document.querySelector('[data-text="nav_progress"]').textContent = t.nav_progress;
-            
-            // Update lesson
-            document.querySelector('[data-text="question_label"]').textContent = t.question_label;
-            document.querySelector('[data-text="loading"]').textContent = t.loading;
-            document.querySelector('[data-text="type_basic"]').textContent = t.type_basic;
-            document.querySelector('[data-text="explanation_title"]').textContent = t.explanation_title;
-            document.querySelector('[data-text="btn_check"]').textContent = t.btn_check;
-            document.querySelector('[data-text="btn_next"]').textContent = t.btn_next;
-            document.querySelector('[data-text="btn_prev"]').textContent = t.btn_prev;
-            document.querySelector('[data-text="btn_shuffle"]').textContent = t.btn_shuffle;
-            
-            // Update quiz
-            document.querySelector('[data-text="quiz_title"]').textContent = t.quiz_title;
-            const quizPassEl = document.querySelector('[data-text="quiz_pass"]');
-            if (quizPassEl) quizPassEl.innerHTML = t.quiz_pass;
-            document.querySelector('[data-text="quiz_info"]').innerHTML = t.quiz_info;
-            document.querySelector('[data-text="quiz_structure_title"]').textContent = t.quiz_structure_title;
-            document.querySelector('[data-text="quiz_basic"]').textContent = t.quiz_basic;
-            document.querySelector('[data-text="quiz_special"]').textContent = t.quiz_special;
-            document.querySelector('[data-text="quiz_pass_info"]').textContent = t.quiz_pass_info;
-            document.querySelector('[data-text="quiz_start"]').textContent = t.quiz_start;
-            document.querySelector('[data-text="quiz_total"]').textContent = t.quiz_total;
-            document.querySelector('[data-text="quiz_question_time"]').textContent = t.quiz_question_time;
-            document.querySelector('[data-text="quiz_next"]').textContent = t.quiz_next;
-            document.querySelector('[data-text="quiz_progress"]').textContent = t.quiz_progress;
-            document.querySelector('[data-text="result_title"]').textContent = t.result_title;
-            document.querySelector('[data-text="result_total"]').textContent = t.result_total;
-            document.querySelector('[data-text="result_pass"]').textContent = t.result_pass;
-            document.querySelector('[data-text="result_correct"]').textContent = t.result_correct;
-            document.querySelector('[data-text="result_time"]').textContent = t.result_time;
-            document.querySelector('[data-text="result_retry"]').textContent = t.result_retry;
-            
-            // Update progress
-            document.querySelector('[data-text="progress_title"]').textContent = t.progress_title;
-            document.querySelector('[data-text="progress_total"]').textContent = t.progress_total;
-            document.querySelector('[data-text="progress_answered"]').textContent = t.progress_answered;
-            document.querySelector('[data-text="progress_correct"]').textContent = t.progress_correct;
-            document.querySelector('[data-text="progress_best"]').textContent = t.progress_best;
-            document.querySelector('[data-text="progress_complete"]').textContent = t.progress_complete;
-            document.querySelector('[data-text="progress_detail_title"]').textContent = t.progress_detail_title;
-            document.querySelector('[data-text="progress_basic"]').textContent = t.progress_basic;
-            document.querySelector('[data-text="progress_special"]').textContent = t.progress_special;
-            document.querySelector('[data-text="progress_quiz_count"]').textContent = t.progress_quiz_count;
-            document.querySelector('[data-text="progress_last_date"]').textContent = t.progress_last_date;
-            document.querySelector('[data-text="progress_reset"]').textContent = t.progress_reset;
-            
-            // Update view mode for questions (bilingual shows both languages)
-            viewMode = lang;
-            if (questions.length > 0) {
-                displayLessonQuestion();
-            }
-            // Update quiz display if quiz is active
-            if (document.getElementById('quiz').classList.contains('active') && quizQuestions.length > 0) {
-                displayQuizQuestion();
-            }
-            
-            updateProgressStats();
-        }
-
-        // Navigation
-        function initNavigation() {
-            document.querySelectorAll('.nav-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    switchTab(tabId);
-                });
-            });
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
-            document.getElementById(tabId).classList.add('active');
-            if (tabId === 'progress') updateProgressStats();
-        }
-
-        // Supabase Connection
-        function connectSupabase() {
-            const url = document.getElementById('supabase-url').value.trim();
-            const key = document.getElementById('supabase-key').value.trim();
-            
-            if (!url || !key) {
-                document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Vui lòng nhập đầy đủ URL và Key</span>';
-                return;
-            }
-
-            document.getElementById('connection-status').innerHTML = '<span style="color: var(--warning);">Đang kết nối...</span>';
-
-            try {
-                sbClient = supabase.createClient(url, key);
-                sbClient.from('questions').select('count').limit(1)
-                    .then(response => {
-                        if (response.error) {
-                            document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Lỗi: ' + response.error.message + '</span>';
-                        } else {
-                            document.getElementById('connection-status').innerHTML = '<span style="color: var(--success);">✓ Kết nối thành công!</span>';
-                            saveSettings(url, key);
-                            loadQuestions();
-                        }
-                    });
-            } catch (err) {
-                document.getElementById('connection-status').innerHTML = '<span style="color: var(--danger);">Lỗi: ' + err.message + '</span>';
-            }
-        }
-
-        // Supabase Configuration
+        // ===== THAY THẾ BẰNG API CỦA BẠN =====
         const SUPABASE_URL = 'https://dktpzhjuscawnfkxxkof.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrdHB6aGp1c2Nhd25ma3h4a29mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU0MTcwNDEsImV4cCI6MjEwMDk5MzA0MX0.h2_3FD3jwsoWH6trazOMayXd9ItqznC6UtcEHXUPyCs';
+        // ========================================
 
-        // Initialize Supabase
-        function initSupabase() {
-            if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            }
-            // Load questions (from Supabase if connected, otherwise sample questions)
-            loadQuestions();
+        const app = document.getElementById('app');
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+
+        function showLoading() {
+            app.innerHTML = '<div class="loading">Đang tải câu hỏi</div>';
         }
 
-        // Load Questions
-        function loadQuestions() {
-            document.getElementById('lesson-loading').style.display = 'flex';
-            document.getElementById('lesson-content').style.display = 'none';
+        function showError(message) {
+            app.innerHTML = `<div class="error"><strong>Lỗi:</strong><br>${message}</div>`;
+        }
 
-            // If Supabase is connected, load from database
-            if (sbClient) {
-                loadFromSupabase();
+        function showDebug(info) {
+            console.log(info);
+        }
+
+        function renderQuestion() {
+            if (questions.length === 0) {
+                showError('Không có câu hỏi nào!');
                 return;
             }
 
-            // Otherwise, load sample questions
-            loadSampleQuestions();
+            const q = questions[currentIndex];
+            const isSpecial = q.question_type === 'special';
+            const options = isSpecial 
+                ? ['A', 'B', 'C'].map((letter, i) => ({ letter, key: `option_${String.fromCharCode(97+i)}_pl` }))
+                : ['Đúng', 'Sai'].map((text, i) => ({ letter: i === 0 ? 'Đ' : 'S', text }));
+
+            app.innerHTML = `
+                <div class="stats">
+                    Câu ${currentIndex + 1} / ${questions.length} | 
+                    Điểm: ${score}
+                </div>
+                <div class="question">
+                    <div style="color: ${isSpecial ? '#f59e0b' : '#3b82f6'}; font-weight: bold; margin-bottom: 10px;">
+                        ${isSpecial ? 'Câu chuyên ngành' : 'Câu cơ bản'}
+                    </div>
+                    <div class="question-text">${q.question_pl || q.question_vi || 'Không có nội dung'}</div>
+                    ${options.map(opt => `
+                        <div class="option" onclick="checkAnswer('${opt.letter}')">${opt.letter}. ${opt.text || q[opt.key + '_pl'] || ''}</div>
+                    `).join('')}
+                </div>
+                <button class="btn" onclick="nextQuestion()" ${currentIndex >= questions.length - 1 ? 'disabled' : ''}>
+                    ${currentIndex >= questions.length - 1 ? 'Hết rồi!' : 'Câu tiếp theo'}
+                </button>
+            `;
         }
 
-        function loadSampleQuestions() {
-            questions = sampleQuestions;
-            progress.totalQuestions = questions.length;
-            saveProgress();
-            updateProgressStats();
+        window.checkAnswer = function(answer) {
+            const q = questions[currentIndex];
+            const correct = (q.correct_answer || '').toUpperCase();
             
-            if (questions.length > 0) {
-                document.getElementById('lesson-loading').style.display = 'none';
-                document.getElementById('lesson-content').style.display = 'block';
-                displayLessonQuestion();
-            }
-        }
+            document.querySelectorAll('.option').forEach(el => {
+                el.style.pointerEvents = 'none';
+                const letter = el.textContent[0];
+                if (letter === correct) el.classList.add('correct');
+                else if (letter === answer && answer !== correct) el.classList.add('wrong');
+            });
 
-        async function loadFromSupabase() {
+            if (answer === correct) score++;
+        };
+
+        window.nextQuestion = function() {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            }
+        };
+
+        async function init() {
+            showLoading();
+            showDebug('Bắt đầu kết nối Supabase...');
+            
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_KEY === 'YOUR_SUPABASE_ANON_KEY') {
+                showError('Chưa cấu hình Supabase!<br>Vui lòng cập nhật SUPABASE_URL và SUPABASE_KEY trong code.');
+                return;
+            }
+
             try {
-                let timedOut = false;
-                let fetchResult = null;
-                
-                const fetchPromise = sbClient.from('questions').select('*').order('id')
-                    .then(response => {
-                        fetchResult = response;
-                    });
-                
-                const timeoutPromise = new Promise((resolve) => {
-                    setTimeout(() => {
-                        timedOut = true;
-                        resolve('timeout');
-                    }, 5000);
-                });
-                
-                await Promise.race([fetchPromise, timeoutPromise]);
-                
-                if (timedOut || !fetchResult) {
-                    throw new Error('Supabase timeout after 5s');
-                }
-                
-                const { data, error } = fetchResult;
-                
+                const { createClient } = supabase;
+                const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+                showDebug('Đã tạo Supabase client');
+
+                showDebug('Đang fetch questions...');
+                const { data, error, status } = await sb
+                    .from('questions')
+                    .select('*')
+                    .limit(10);
+
+                showDebug('Response status: ' + status);
+                showDebug('Data: ' + JSON.stringify(data));
+                showDebug('Error: ' + JSON.stringify(error));
+
                 if (error) throw error;
+                if (!data || data.length === 0) {
+                    showError('Không có dữ liệu trong bảng questions!<br>Hãy thêm dữ liệu vào Supabase.');
+                    return;
+                }
 
                 questions = data;
-                progress.totalQuestions = questions.length;
-                saveProgress();
-                updateProgressStats();
-                
-                if (questions.length > 0) {
-                    document.getElementById('lesson-loading').style.display = 'none';
-                    document.getElementById('lesson-content').style.display = 'block';
-                    displayLessonQuestion();
-                } else {
-                    // No questions in database, load sample questions
-                    loadSampleQuestions();
-                }
+                showDebug('Tải thành công ' + questions.length + ' câu hỏi');
+                renderQuestion();
+
             } catch (err) {
-                console.log('Supabase connection failed, loading sample questions:', err.message);
-                // Fallback to sample questions if Supabase fails
-                loadSampleQuestions();
+                showDebug('Catch error: ' + err.message);
+                showError(`Lỗi kết nối: ${err.message}`);
             }
         }
 
-        // Display Lesson Question
-        function displayLessonQuestion() {
-            if (questions.length === 0) return;
-
-            const q = questions[currentLessonIndex];
-            document.getElementById('lesson-current').textContent = currentLessonIndex + 1;
-            document.getElementById('lesson-total').textContent = questions.length;
-            
-            const typeEl = document.getElementById('question-type');
-            typeEl.textContent = q.question_type === 'special' ? translations[currentLang].type_special : translations[currentLang].type_basic;
-            typeEl.className = 'question-type ' + (q.question_type === 'special' ? 'special' : 'basic');
-            
-            document.getElementById('question-text').textContent = getQuestionText(q);
-            
-            const imgEl = document.getElementById('question-image');
-            if (q.image_url) { imgEl.src = q.image_url; imgEl.style.display = 'block'; }
-            else { imgEl.style.display = 'none'; }
-            
-            const optionsContainer = document.getElementById('lesson-options');
-            optionsContainer.innerHTML = '';
-            ['A', 'B', 'C'].forEach((letter, idx) => {
-                const key = ['option_a', 'option_b', 'option_c'][idx];
-                if (q[key + '_pl'] || q[key + '_vi']) {
-                    const div = document.createElement('div');
-                    div.className = 'option';
-                    div.innerHTML = `<span class="option-letter">${letter}</span><span class="option-text">${getOptionText(q, key)}</span>`;
-                    div.addEventListener('click', () => selectLessonOption(div, letter));
-                    optionsContainer.appendChild(div);
-                }
-            });
-            
-            selectedOption = null;
-            answerChecked = false;
-            document.getElementById('btn-check').style.display = 'none';
-            document.getElementById('btn-next').style.display = 'none';
-            document.getElementById('lesson-explanation').style.display = 'none';
-        }
-
-        function getQuestionText(q) {
-            if (viewMode === 'pl') return q.question_pl || q.question_vi;
-            if (viewMode === 'vi') return q.question_vi || q.question_pl;
-            // Bilingual mode - show both
-            if (q.question_pl && q.question_vi) return q.question_pl + '\n\n' + q.question_vi;
-            return q.question_pl || q.question_vi || '';
-        }
-
-        function getOptionText(q, key) {
-            const pl = q[key + '_pl'] || '';
-            const vi = q[key + '_vi'] || '';
-            if (viewMode === 'pl') return pl || vi;
-            if (viewMode === 'vi') return vi || pl;
-            // Bilingual mode - show both
-            if (pl && vi) return pl + '\n' + vi;
-            return pl || vi;
-        }
-
-        function selectLessonOption(element, letter) {
-            if (answerChecked) return;
-            document.querySelectorAll('#lesson-options .option').forEach(o => o.classList.remove('selected'));
-            element.classList.add('selected');
-            selectedOption = letter;
-            checkAnswer();
-        }
-
-        function checkAnswer() {
-            if (!selectedOption || answerChecked) return;
-            const q = questions[currentLessonIndex];
-            const isCorrect = selectedOption === q.correct_answer;
-            answerChecked = true;
-            
-            document.querySelectorAll('#lesson-options .option').forEach(o => {
-                o.classList.add('disabled');
-                if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
-                else if (o.classList.contains('selected') && !isCorrect) o.classList.add('incorrect');
-            });
-            
-            if (!progress.answeredQuestions.includes(q.id)) {
-                progress.answeredQuestions.push(q.id);
-                if (isCorrect) progress.correctAnswers.push(q.id);
-                if (q.question_type === 'basic') progress.basicLearned++;
-                else progress.specialLearned++;
-                progress.lastStudyDate = new Date().toISOString();
-                saveProgress();
-                updateProgressStats();
-            }
-            
-            // Show result message and explanation
-            document.getElementById('lesson-explanation').style.display = 'block';
-            const explanationBox = document.getElementById('lesson-explanation');
-            const explanationTitle = document.querySelector('.explanation-title');
-            const explanationText = document.getElementById('explanation-text');
-            
-            if (isCorrect) {
-                explanationBox.classList.add('correct');
-                explanationBox.classList.remove('incorrect');
-                explanationTitle.textContent = currentLang === 'vi' ? 'Chinh xac!' : (currentLang === 'pl' ? 'Dokladnie!' : 'Chinh xac / Dokladnie!');
-                explanationTitle.style.color = 'var(--success)';
-                explanationText.textContent = getExplanationText(q);
-                
-                // Auto-jump to next question after 1.5 seconds
-                setTimeout(() => {
-                    if (currentLessonIndex < questions.length - 1) {
-                        currentLessonIndex++;
-                        displayLessonQuestion();
-                    } else {
-                        alert(translations[currentLang].alert_completed);
-                    }
-                }, 1500);
-            } else {
-                explanationBox.classList.add('incorrect');
-                explanationBox.classList.remove('correct');
-                explanationTitle.textContent = currentLang === 'vi' ? 'Sai roi!' : (currentLang === 'pl' ? 'Zle!' : 'Sai roi / Zle!');
-                explanationTitle.style.color = 'var(--danger)';
-                explanationText.textContent = getExplanationText(q);
-                document.getElementById('btn-next').style.display = 'block';
-                document.getElementById('btn-next').textContent = currentLessonIndex < questions.length - 1 ? translations[currentLang].btn_next : (currentLang === 'vi' ? 'Hoan thanh' : 'Ukonczono');
-            }
-
-        function getExplanationText(q) {
-            if (viewMode === 'pl') return q.explanation_pl || q.explanation_vi || 'Brak wyjasnienia.';
-            if (viewMode === 'vi') return q.explanation_vi || q.explanation_pl || 'Khong co giai thich.';
-            // Bilingual mode - show both
-            if (q.explanation_pl && q.explanation_vi) return q.explanation_pl + '\n\n' + q.explanation_vi;
-            return q.explanation_vi || q.explanation_pl || 'Khong co giai thich.';
-        }
-
-        function nextQuestion() {
-            if (currentLessonIndex < questions.length - 1) { currentLessonIndex++; displayLessonQuestion(); }
-            else alert(translations[currentLang].alert_completed);
-        }
-
-        function prevLessonQuestion() {
-            if (currentLessonIndex > 0) { currentLessonIndex--; displayLessonQuestion(); }
-        }
-
-        function shuffleQuestions() {
-            questions = [...questions].sort(() => Math.random() - 0.5);
-            currentLessonIndex = 0;
-            displayLessonQuestion();
-        }
-
-        // Quiz Functions
-        function startQuiz() {
-            if (questions.length < 32) {
-                alert(translations[currentLang].alert_need_questions + questions.length + translations[currentLang].alert_need_more);
-                return;
-            }
-
-            const basicQs = questions.filter(q => q.question_type === 'basic').sort(() => Math.random() - 0.5);
-            const specialQs = questions.filter(q => q.question_type === 'special').sort(() => Math.random() - 0.5);
-            
-            quizQuestions = [...basicQs.slice(0, 20), ...specialQs.slice(0, 12)];
-            assignQuizPoints();
-            quizQuestions = quizQuestions.sort(() => Math.random() - 0.5);
-            
-            quizAnswers = new Array(32).fill(null);
-            currentQuizIndex = 0;
-            quizStartTime = Date.now();
-            
-            const dotsContainer = document.getElementById('quiz-dots');
-            dotsContainer.innerHTML = '';
-            for (let i = 0; i < 32; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.textContent = i + 1;
-                dotsContainer.appendChild(dot);
-            }
-            
-            document.getElementById('quiz-start').style.display = 'none';
-            document.getElementById('quiz-content').style.display = 'block';
-            document.getElementById('quiz-result').style.display = 'none';
-            
-            displayQuizQuestion();
-            startTotalTimer();
-            startQuestionTimer();
-        }
-
-        function assignQuizPoints() {
-            const basicPoints = [3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,1,1,1,1].sort(() => Math.random() - 0.5);
-            const specialPoints = [3,3,3,3,3,3,2,2,2,2,1,1].sort(() => Math.random() - 0.5);
-            
-            quizQuestions.slice(0, 20).forEach((q, i) => q.points = basicPoints[i] || 3);
-            quizQuestions.slice(20, 32).forEach((q, i) => q.points = specialPoints[i] || 3);
-        }
-
-        function displayQuizQuestion() {
-            const q = quizQuestions[currentQuizIndex];
-            
-            document.querySelectorAll('#quiz-dots .dot').forEach((dot, idx) => {
-                dot.classList.remove('current', 'answered', 'wrong');
-                if (idx === currentQuizIndex) dot.classList.add('current');
-                else if (quizAnswers[idx] !== null) dot.classList.add(quizAnswers[idx].correct ? 'answered' : 'wrong');
-            });
-            
-            const typeEl = document.getElementById('quiz-question-type');
-            typeEl.textContent = q.question_type === 'special' ? translations[currentLang].type_special : translations[currentLang].type_basic;
-            typeEl.className = 'question-type ' + (q.question_type === 'special' ? 'special' : 'basic');
-            document.getElementById('quiz-question-points').textContent = (q.points || 3) + ' ' + (currentLang === 'vi' ? 'điểm' : 'pkt');
-            document.getElementById('quiz-question-text').textContent = getQuestionText(q);
-            
-            const imgEl = document.getElementById('quiz-question-image');
-            if (q.image_url) { imgEl.src = q.image_url; imgEl.style.display = 'block'; }
-            else { imgEl.style.display = 'none'; }
-            
-            const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = '';
-            ['A', 'B', 'C'].forEach((letter, idx) => {
-                const key = ['option_a', 'option_b', 'option_c'][idx];
-                if (q[key + '_pl'] || q[key + '_vi']) {
-                    const div = document.createElement('div');
-                    div.className = 'option';
-                    div.innerHTML = `<span class="option-letter">${letter}</span><span class="option-text">${getOptionText(q, key)}</span>`;
-                    div.addEventListener('click', () => selectQuizOption(div, letter));
-                    optionsContainer.appendChild(div);
-                }
-            });
-            
-            document.getElementById('quiz-current').textContent = currentQuizIndex + 1;
-            document.getElementById('btn-quiz-next').disabled = quizAnswers[currentQuizIndex] === null;
-            document.getElementById('btn-quiz-next').textContent = currentQuizIndex < 31 ? translations[currentLang].quiz_next : translations[currentLang].quiz_result;
-        }
-
-        function selectQuizOption(element, letter) {
-            if (quizAnswers[currentQuizIndex] !== null) return;
-            clearInterval(questionTimer);
-            
-            document.querySelectorAll('#quiz-options .option').forEach(o => o.classList.add('disabled'));
-            element.classList.add('selected');
-            
-            const q = quizQuestions[currentQuizIndex];
-            const isCorrect = letter === q.correct_answer;
-            const points = q.points || 3;
-            
-            quizAnswers[currentQuizIndex] = { selected: letter, correct: isCorrect, points: isCorrect ? points : 0 };
-            element.classList.add(isCorrect ? 'correct' : 'incorrect');
-            
-            if (!isCorrect) {
-                document.querySelectorAll('#quiz-options .option').forEach(o => {
-                    if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
-                });
-            }
-            
-            document.getElementById('btn-quiz-next').disabled = false;
-        }
-
-        function nextQuizQuestion() {
-            if (currentQuizIndex < 31) { currentQuizIndex++; displayQuizQuestion(); startQuestionTimer(); }
-            else finishQuiz();
-        }
-
-        function startTotalTimer() {
-            let timeLeft = 25 * 60;
-            updateTotalTimerDisplay(timeLeft);
-            totalTimer = setInterval(() => {
-                timeLeft--;
-                updateTotalTimerDisplay(timeLeft);
-                if (timeLeft <= 0) { clearInterval(totalTimer); finishQuiz(); }
-            }, 1000);
-        }
-
-        function updateTotalTimerDisplay(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            const display = `${m}:${s}`;
-            const timerEl = document.getElementById('quiz-timer');
-            timerEl.textContent = display;
-            document.getElementById('total-time').textContent = display;
-            timerEl.classList.remove('warning', 'danger');
-            if (seconds <= 60) timerEl.classList.add('danger');
-            else if (seconds <= 180) timerEl.classList.add('warning');
-        }
-
-        function startQuestionTimer() {
-            const q = quizQuestions[currentQuizIndex];
-            currentQuestionTime = q.question_type === 'special' ? 50 : 35;
-            updateQuestionTimerDisplay(currentQuestionTime);
-            questionTimer = setInterval(() => {
-                currentQuestionTime--;
-                updateQuestionTimerDisplay(currentQuestionTime);
-                if (currentQuestionTime <= 0) { clearInterval(questionTimer); questionTimeout(); }
-            }, 1000);
-        }
-
-        function updateQuestionTimerDisplay(seconds) {
-            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-            const s = (seconds % 60).toString().padStart(2, '0');
-            const display = `${m}:${s}`;
-            document.getElementById('question-time').textContent = display;
-            const el = document.getElementById('question-time');
-            el.style.color = seconds <= 5 ? 'var(--danger)' : (seconds <= 10 ? 'var(--warning)' : 'var(--text-secondary)');
-        }
-
-        function questionTimeout() {
-            if (quizAnswers[currentQuizIndex] === null) {
-                const q = quizQuestions[currentQuizIndex];
-                quizAnswers[currentQuizIndex] = { selected: null, correct: false, points: 0, skipped: true };
-                document.querySelectorAll('#quiz-options .option').forEach(o => {
-                    o.classList.add('disabled');
-                    if (o.querySelector('.option-letter').textContent === q.correct_answer) o.classList.add('correct');
-                });
-                document.getElementById('btn-quiz-next').disabled = false;
-            }
-        }
-
-        function finishQuiz() {
-            clearInterval(totalTimer);
-            clearInterval(questionTimer);
-            
-            let totalPoints = 0, correctCount = 0;
-            quizQuestions.forEach((q, idx) => {
-                if (quizAnswers[idx]?.correct) { totalPoints += quizAnswers[idx].points; correctCount++; }
-            });
-            
-            const passed = totalPoints >= 68;
-            progress.quizCount++;
-            if (totalPoints > progress.quizBestScore) progress.quizBestScore = totalPoints;
-            progress.lastStudyDate = new Date().toISOString();
-            saveProgress();
-            updateProgressStats();
-            
-            document.getElementById('quiz-content').style.display = 'none';
-            document.getElementById('quiz-result').style.display = 'block';
-            
-            const elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
-            const m = Math.floor(elapsed / 60);
-            const s = (elapsed % 60).toString().padStart(2, '0');
-            
-            document.getElementById('result-score').textContent = totalPoints;
-            document.getElementById('result-score').className = 'result-score ' + (passed ? 'pass' : 'fail');
-            document.getElementById('result-status').textContent = passed ? (currentLang === 'vi' ? 'Đạt yêu cầu!' : 'Zaliczone!') : (currentLang === 'vi' ? 'Chưa đạt (cần 68 điểm)' : 'Nie zaliczono (potrzeba 68 pkt)');
-            document.getElementById('result-total').textContent = totalPoints + ' / 74';
-            document.getElementById('result-correct').textContent = correctCount + ' / 32';
-            document.getElementById('result-time').textContent = `${m}:${s}`;
-        }
-
-        function restartQuiz() {
-            document.getElementById('quiz-result').style.display = 'none';
-            document.getElementById('quiz-start').style.display = 'block';
-        }
-
-        // Progress Functions
-        function loadProgress() {
-            const saved = localStorage.getItem('driving_test_progress');
-            if (saved) progress = { ...progress, ...JSON.parse(saved) };
-            updateProgressStats();
-        }
-
-        function saveProgress() {
-            localStorage.setItem('driving_test_progress', JSON.stringify(progress));
-        }
-
-        function updateProgressStats() {
-            document.getElementById('progress-total').textContent = progress.totalQuestions;
-            document.getElementById('progress-answered').textContent = progress.answeredQuestions.length;
-            const percent = progress.totalQuestions > 0 ? Math.round((progress.answeredQuestions.length / progress.totalQuestions) * 100) : 0;
-            document.getElementById('progress-percent').textContent = percent;
-            document.getElementById('progress-fill').style.width = percent + '%';
-            const correctRate = progress.answeredQuestions.length > 0 ? Math.round((progress.correctAnswers.length / progress.answeredQuestions.length) * 100) : 0;
-            document.getElementById('progress-correct').textContent = correctRate + '%';
-            document.getElementById('progress-best').textContent = progress.quizBestScore > 0 ? progress.quizBestScore + ' ' + (currentLang === 'vi' ? 'điểm' : 'pkt') : '0 ' + (currentLang === 'vi' ? 'điểm' : 'pkt');
-            const basicTotal = questions.filter(q => q.question_type === 'basic').length;
-            const specialTotal = questions.filter(q => q.question_type === 'special').length;
-            document.getElementById('stat-basic-learned').textContent = progress.basicLearned + ' / ' + (basicTotal || 20);
-            document.getElementById('stat-special-learned').textContent = progress.specialLearned + ' / ' + (specialTotal || 12);
-            document.getElementById('stat-quiz-count').textContent = progress.quizCount;
-            document.getElementById('stat-last-date').textContent = progress.lastStudyDate ? new Date(progress.lastStudyDate).toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'pl-PL') : '--';
-        }
-
-        function resetProgress() {
-            if (confirm(translations[currentLang].alert_reset_progress)) {
-                progress = { totalQuestions: questions.length, answeredQuestions: [], correctAnswers: [], quizBestScore: 0, quizCount: 0, lastStudyDate: null, basicLearned: 0, specialLearned: 0 };
-                saveProgress();
-                updateProgressStats();
-            }
-        }
-
-        // Settings Functions
-        function loadSettings() {
-            // Settings are configured directly in the code/GitHub
-            const savedLang = localStorage.getItem('app_lang');
-            if (savedLang) { currentLang = savedLang; switchLanguage(savedLang); }
-        }
-
-        function saveSettings(url, key) {
-            // Settings are configured directly in the code/GitHub
-        }
+        init();
     </script>
 </body>
 </html>
