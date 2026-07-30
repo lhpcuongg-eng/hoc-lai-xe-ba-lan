@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Học Lái Xe Bằng B1 Ba Lan</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.7"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -690,7 +690,7 @@
         // ==============================
 
         // State
-        let supabase = null;
+        let sb = null; // Supabase client (avoid name conflict with global 'supabase')
         let questions = [];
         let currentLang = 'vi';
         let currentIndex = 0;
@@ -753,8 +753,7 @@
             }
 
             try {
-                const { createClient } = supabase;
-                supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+                sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 await loadQuestions();
                 loadProgress();
                 updateProgressStats();
@@ -769,7 +768,7 @@
             document.getElementById('learn-content').style.display = 'none';
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await sb
                     .from('questions')
                     .select('*')
                     .limit(50);
