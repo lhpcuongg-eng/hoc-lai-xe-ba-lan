@@ -1102,8 +1102,33 @@
         function loadProgress() {
             try {
                 const saved = localStorage.getItem('b1_progress');
-                if (saved) progress = JSON.parse(saved);
-            } catch (e) {}
+                if (saved) {
+                    const oldProgress = JSON.parse(saved);
+                    // Nếu progress cũ có format số (index), convert sang format mới
+                    if (oldProgress.answeredQuestions && oldProgress.answeredQuestions.length > 0) {
+                        const firstItem = oldProgress.answeredQuestions[0];
+                        if (typeof firstItem === 'number') {
+                            // Format cũ: số index, cần convert sang string key
+                            console.log('Converting old progress format...');
+                            const newAnswered = oldProgress.answeredQuestions.map(idx => `q_${idx}`);
+                            const newCorrect = oldProgress.correctAnswers.map(idx => `q_${idx}`);
+                            progress = {
+                                ...oldProgress,
+                                answeredQuestions: newAnswered,
+                                correctAnswers: newCorrect
+                            };
+                            saveProgress();
+                            console.log('Progress converted. New format:', progress.answeredQuestions.slice(0, 3));
+                        } else {
+                            progress = oldProgress;
+                        }
+                    } else {
+                        progress = oldProgress;
+                    }
+                }
+            } catch (e) {
+                console.error('Error loading progress:', e);
+            }
         }
 
         function saveProgress() {
