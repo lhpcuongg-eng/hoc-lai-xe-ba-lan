@@ -1120,18 +1120,19 @@
             
             document.getElementById('stat-best').textContent = progress.quizBestScore;
             
-            // Tính số câu đã học (đúng) cho từng loại
+            // Đếm số câu đã trả lời (đúng) cho từng loại
             const basicQuestions = questions.filter(q => q.question_type === 'basic');
             const specialQuestions = questions.filter(q => q.question_type === 'special');
             
-            const basicCorrect = progress.answeredQuestions.filter(idx => {
-                return questions[idx] && questions[idx].question_type === 'basic' 
-                    && progress.correctAnswers.includes(idx);
+            // Lấy ID của các câu basic/special đã trả lời đúng
+            const basicCorrect = progress.answeredQuestions.filter(qId => {
+                const q = questions.find(q => (q.id || q.question_type + '_' + questions.indexOf(q)) === qId);
+                return q && q.question_type === 'basic' && progress.correctAnswers.includes(qId);
             }).length;
             
-            const specialCorrect = progress.answeredQuestions.filter(idx => {
-                return questions[idx] && questions[idx].question_type === 'special' 
-                    && progress.correctAnswers.includes(idx);
+            const specialCorrect = progress.answeredQuestions.filter(qId => {
+                const q = questions.find(q => (q.id || q.question_type + '_' + questions.indexOf(q)) === qId);
+                return q && q.question_type === 'special' && progress.correctAnswers.includes(qId);
             }).length;
             
             document.getElementById('stat-basic').textContent = `${basicCorrect} / ${basicQuestions.length}`;
