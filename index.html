@@ -1040,8 +1040,24 @@
             document.getElementById('stat-correct').textContent = rate + '%';
             
             document.getElementById('stat-best').textContent = progress.quizBestScore;
-            document.getElementById('stat-basic').textContent = `${progress.basicLearned} / 20`;
-            document.getElementById('stat-special').textContent = `${progress.specialLearned} / 12`;
+            
+            // Tính số câu đã học (đúng) cho từng loại
+            const basicQuestions = questions.filter(q => q.question_type === 'basic');
+            const specialQuestions = questions.filter(q => q.question_type === 'special');
+            
+            const basicCorrect = progress.answeredQuestions.filter(idx => {
+                return questions[idx] && questions[idx].question_type === 'basic' 
+                    && progress.correctAnswers.includes(idx);
+            }).length;
+            
+            const specialCorrect = progress.answeredQuestions.filter(idx => {
+                return questions[idx] && questions[idx].question_type === 'special' 
+                    && progress.correctAnswers.includes(idx);
+            }).length;
+            
+            document.getElementById('stat-basic').textContent = `${basicCorrect} / ${basicQuestions.length}`;
+            document.getElementById('stat-special').textContent = `${specialCorrect} / ${specialQuestions.length}`;
+            
             document.getElementById('stat-quiz-count').textContent = progress.quizCount;
             document.getElementById('stat-last-date').textContent = progress.lastStudyDate
                 ? new Date(progress.lastStudyDate).toLocaleDateString()
