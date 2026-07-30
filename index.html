@@ -1014,11 +1014,16 @@
                 }
             }
             
-            // Save progress - tìm index thực trong mảng questions gốc
+            // Tạo ID duy nhất cho câu hỏi dựa trên nội dung
+            const questionKey = `q_${q.id || (q.question_type + '_' + q.question_text.substring(0, 30))}`;
+            
+            // Save progress - dùng questionKey thay vì index
             const isCorrect = letter === correct;
-            const idxInQuestions = questions.findIndex(q2 => q2.id === q.id && q2.question_type === q.question_type);
-            const questionId = idxInQuestions >= 0 ? idxInQuestions : currentIndex;
-            saveAnswer(questionId, isCorrect, q.question_type);
+            saveAnswer(questionKey, isCorrect, q.question_type);
+            
+            // Debug log
+            console.log('Saved answer:', questionKey, 'type:', q.question_type, 'correct:', isCorrect);
+            console.log('Current answeredQuestions:', progress.answeredQuestions);
             
             // Cập nhật stats ngay sau khi trả lời
             updateProgressStats();
