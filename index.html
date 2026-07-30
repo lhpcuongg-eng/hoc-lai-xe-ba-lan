@@ -1027,8 +1027,12 @@
             const isCorrect = letter === correct;
             saveAnswer(questionKey, isCorrect, q.question_type);
             
+            // Debug log
+            console.log('Saved:', questionKey, 'type:', q.question_type, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
+            
             // Cập nhật stats ngay sau khi trả lời
             updateProgressStats();
+            console.log('After update - answeredQuestions:', progress.answeredQuestions.length);
         }
 
         function prevQuestion() {
