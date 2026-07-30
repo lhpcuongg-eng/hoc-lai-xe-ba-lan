@@ -884,12 +884,28 @@
 
         async function loadFromSupabase() {
             try {
-                const fetchPromise = sbClient.from('questions').select('*').order('id');
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Supabase timeout after 5s')), 5000)
-                );
+                let timedOut = false;
+                let fetchResult = null;
                 
-                const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+                const fetchPromise = sbClient.from('questions').select('*').order('id')
+                    .then(response => {
+                        fetchResult = response;
+                    });
+                
+                const timeoutPromise = new Promise((resolve) => {
+                    setTimeout(() => {
+                        timedOut = true;
+                        resolve('timeout');
+                    }, 5000);
+                });
+                
+                await Promise.race([fetchPromise, timeoutPromise]);
+                
+                if (timedOut || !fetchResult) {
+                    throw new Error('Supabase timeout after 5s');
+                }
+                
+                const { data, error } = fetchResult;
                 
                 if (error) throw error;
 
