@@ -1016,7 +1016,8 @@
             
             // Save progress - tìm index thực trong mảng questions gốc
             const isCorrect = letter === correct;
-            const questionId = q.id || q.question_type + '_' + questions.indexOf(q);
+            const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
+            const questionId = q.id || q.question_type + '_' + (idxInQuestions >= 0 ? idxInQuestions : currentIndex);
             saveAnswer(questionId, isCorrect, q.question_type);
             
             // Cập nhật stats ngay sau khi trả lời
