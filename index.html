@@ -1020,19 +1020,20 @@
                 }
             }
             
-            // Tạo ID duy nhất cho câu hỏi dựa trên nội dung
-            const questionKey = `q_${q.id || (q.question_type + '_' + q.question_text.substring(0, 30))}`;
+            // Tạo ID duy nhất cho câu hỏi - dùng index trong mảng gốc
+            const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
+            const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${currentIndex}`;
             
             // Save progress - dùng questionKey thay vì index
             const isCorrect = letter === correct;
             saveAnswer(questionKey, isCorrect, q.question_type);
             
             // Debug log
-            console.log('Saved:', questionKey, 'type:', q.question_type, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
+            console.log('Saved:', questionKey, 'type:', q.question_type, 'idxInQuestions:', idxInQuestions, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
             
             // Cập nhật stats ngay sau khi trả lời
             updateProgressStats();
-            console.log('After update - answeredQuestions:', progress.answeredQuestions.length);
+            console.log('After update - answeredQuestions:', progress.answeredQuestions);
         }
 
         function prevQuestion() {
@@ -1147,16 +1148,27 @@
             // Đếm basic đã trả lời
             let basicAnswered = 0;
             basicQuestions.forEach(q => {
-                const questionKey = `q_${q.id || (q.question_type + '_' + q.question_text.substring(0, 30))}`;
-                if (answeredSet.has(questionKey)) basicAnswered++;
+                const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
+                const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${questions.indexOf(q)}`;
+                if (answeredSet.has(questionKey)) {
+                    basicAnswered++;
+                    console.log('Basic matched:', questionKey);
+                }
             });
             
             // Đếm special đã trả lời
             let specialAnswered = 0;
             specialQuestions.forEach(q => {
-                const questionKey = `q_${q.id || (q.question_type + '_' + q.question_text.substring(0, 30))}`;
-                if (answeredSet.has(questionKey)) specialAnswered++;
+                const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
+                const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${questions.indexOf(q)}`;
+                if (answeredSet.has(questionKey)) {
+                    specialAnswered++;
+                    console.log('Special matched:', questionKey);
+                }
             });
+            
+            console.log('Stats: basicAnswered=', basicAnswered, '/', basicQuestions.length, ', specialAnswered=', specialAnswered, '/', specialQuestions.length);
+            console.log('answeredSet contents:', [...answeredSet]);
             
             document.getElementById('stat-basic').textContent = `${basicAnswered} / ${basicQuestions.length}`;
             document.getElementById('stat-special').textContent = `${specialAnswered} / ${specialQuestions.length}`;
