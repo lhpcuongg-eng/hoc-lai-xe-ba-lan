@@ -522,6 +522,7 @@
             <div class="lang-switcher">
                 <button class="lang-btn active" onclick="switchLang('vi')">🇻🇳 Tiếng Việt</button>
                 <button class="lang-btn" onclick="switchLang('pl')">🇵🇱 Polski</button>
+                <button class="lang-btn" onclick="switchLang('both')">📖 Song ngữ</button>
             </div>
         </div>
         
@@ -727,7 +728,10 @@
                 next: 'Câu tiếp theo',
                 prev: 'Câu trước',
                 question: 'câu',
-                score: 'điểm'
+                score: 'điểm',
+                vi_label: 'Tiếng Việt',
+                pl_label: 'Polski',
+                both_label: 'Song ngữ'
             },
             pl: {
                 loading: 'Ładowanie pytań...',
@@ -740,7 +744,26 @@
                 next: 'Następne',
                 prev: 'Poprzednie',
                 question: 'pytanie',
-                score: 'punktów'
+                score: 'punktów',
+                vi_label: 'Wietnamski',
+                pl_label: 'Polski',
+                both_label: 'Dwujęzyczny'
+            },
+            both: {
+                loading: 'Đang tải câu hỏi...',
+                error: 'Lỗi kết nối',
+                basic: 'Cơ bản',
+                special: 'Chuyên ngành',
+                correct: 'Chính xác!',
+                wrong: 'Chưa đúng!',
+                explanation: 'Giải thích',
+                next: 'Câu tiếp theo',
+                prev: 'Câu trước',
+                question: 'câu',
+                score: 'điểm',
+                vi_label: 'Tiếng Việt',
+                pl_label: 'Polski',
+                both_label: 'Song ngữ'
             }
         };
 
@@ -811,9 +834,23 @@
             // Counter
             document.getElementById('q-counter').textContent = `${currentIndex + 1} / ${questions.length}`;
             
-            // Question text
-            const questionText = currentLang === 'vi' ? q.question_vi : q.question_pl;
-            document.getElementById('q-text').textContent = questionText || 'Không có nội dung';
+            // Question text - show both languages if bilingual mode
+            let questionEl = document.getElementById('q-text');
+            if (currentLang === 'both') {
+                questionEl.innerHTML = `
+                    <div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                        <span style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">🇻🇳 TIẾNG VIỆT</span>
+                        <div style="margin-top: 6px;">${q.question_vi || 'Không có nội dung'}</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">🇵🇱 POLSKI</span>
+                        <div style="margin-top: 6px;">${q.question_pl || 'Brak treści'}</div>
+                    </div>
+                `;
+            } else {
+                const questionText = currentLang === 'vi' ? q.question_vi : q.question_pl;
+                questionEl.innerHTML = questionText || 'Không có nội dung';
+            }
             
             // Image
             const imgEl = document.getElementById('q-image');
@@ -824,31 +861,40 @@
                 imgEl.classList.remove('show');
             }
             
-            // Options
+            // Options - show both languages if bilingual mode
             const optionsEl = document.getElementById('q-options');
             optionsEl.innerHTML = '';
             selectedAnswer = null;
             
             const options = isSpecial
-                ? ['A', 'B', 'C'].map((letter, i) => ({
-                    letter,
-                    text: currentLang === 'vi' 
-                        ? q[`option_${String.fromCharCode(97+i)}_vi`]
-                        : q[`option_${String.fromCharCode(97+i)}_pl`]
-                  }))
+                ? ['A', 'B', 'C'].map((letter, i) => {
+                    const vi = q[`option_${String.fromCharCode(97+i)}_vi`];
+                    const pl = q[`option_${String.fromCharCode(97+i)}_pl`];
+                    return { letter, vi, pl, text: currentLang === 'vi' ? vi : (currentLang === 'pl' ? pl : `${vi} / ${pl}`) };
+                  })
                 : [
-                    { letter: 'Đ', text: currentLang === 'vi' ? 'Đúng' : 'Prawda' },
-                    { letter: 'S', text: currentLang === 'vi' ? 'Sai' : 'Fałsz' }
+                    { letter: 'Đ', vi: 'Đúng', pl: 'Prawda', text: currentLang === 'vi' ? 'Đúng' : (currentLang === 'pl' ? 'Prawda' : 'Đúng / Prawda') },
+                    { letter: 'S', vi: 'Sai', pl: 'Fałsz', text: currentLang === 'vi' ? 'Sai' : (currentLang === 'pl' ? 'Fałsz' : 'Sai / Fałsz') }
                   ];
 
             options.forEach(opt => {
                 if (!opt.text) return;
                 const div = document.createElement('div');
+                if (currentLang === 'both') {
+                    div.innerHTML = `
+                        <span class="option-letter">${opt.letter}</span>
+                        <div style="flex: 1;">
+                            <div style="color: var(--text-primary);">${opt.vi}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">${opt.pl}</div>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <span class="option-letter">${opt.letter}</span>
+                        <span class="option-text">${opt.text}</span>
+                    `;
+                }
                 div.className = 'option';
-                div.innerHTML = `
-                    <span class="option-letter">${opt.letter}</span>
-                    <span class="option-text">${opt.text}</span>
-                `;
                 div.onclick = () => selectOption(div, opt.letter);
                 optionsEl.appendChild(div);
             });
@@ -884,10 +930,23 @@
             });
             
             // Show explanation
-            const explanation = currentLang === 'vi' ? q.explanation_vi : q.explanation_pl;
-            if (explanation) {
-                document.getElementById('q-explanation-text').textContent = explanation;
-                document.getElementById('q-explanation').classList.add('show');
+            if (currentLang === 'both') {
+                const expVi = q.explanation_vi;
+                const expPl = q.explanation_pl;
+                if (expVi || expPl) {
+                    document.getElementById('q-explanation').innerHTML = `
+                        <h4>💡 Giải thích / Wyjaśnienie</h4>
+                        <div style="margin-bottom: 8px;">🇻🇳 ${expVi || 'Không có'}</div>
+                        <div style="color: var(--text-secondary);">🇵🇱 ${expPl || 'Brak'}</div>
+                    `;
+                    document.getElementById('q-explanation').classList.add('show');
+                }
+            } else {
+                const explanation = currentLang === 'vi' ? q.explanation_vi : q.explanation_pl;
+                document.getElementById('q-explanation-text').textContent = explanation || '';
+                if (explanation) {
+                    document.getElementById('q-explanation').classList.add('show');
+                }
             }
             
             // Save progress
@@ -919,11 +978,17 @@
         function switchLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.includes(lang === 'vi' ? 'Việt' : 'Pol'));
+                btn.classList.remove('active');
             });
-            document.querySelector('.header h1').textContent = lang === 'vi' 
-                ? '🚗 Học Lái Xe Bằng B1'
-                : '🚗 Nauka Jazdy Kat. B';
+            event.target.classList.add('active');
+            
+            const titles = {
+                vi: '🚗 Học Lái Xe Bằng B1',
+                pl: '🚗 Nauka Jazdy Kat. B',
+                both: '🚗 Học Lái Xe Bằng B1'
+            };
+            document.querySelector('.header h1').textContent = titles[lang] || titles.vi;
+            
             if (questions.length > 0) renderQuestion();
         }
 
@@ -1049,15 +1114,18 @@
                     text: q[`option_${String.fromCharCode(97+i)}_pl`] || q[`option_${String.fromCharCode(97+i)}_vi`]
                   }))
                 : [
-                    { letter: 'Đ', text: 'Đúng' },
-                    { letter: 'S', text: 'Sai' }
+                    { letter: 'Đ', text: 'Đúng / Prawda' },
+                    { letter: 'S', text: 'Sai / Fałsz' }
                   ];
 
             const questionHtml = `
                 <div class="question-header">
                     <span class="question-type ${isSpecial ? 'special' : 'basic'}">${isSpecial ? 'Chuyên ngành' : 'Cơ bản'}</span>
                 </div>
-                <div class="question-text">${q.question_pl || q.question_vi}</div>
+                <div class="question-text">
+                    <div style="margin-bottom: 8px;">🇻🇳 ${q.question_vi}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.95rem;">🇵🇱 ${q.question_pl}</div>
+                </div>
                 <div class="options">
                     ${options.filter(o => o.text).map(opt => `
                         <div class="option" onclick="selectQuizOption(this, '${opt.letter}')">
