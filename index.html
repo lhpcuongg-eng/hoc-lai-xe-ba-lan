@@ -873,8 +873,8 @@
                     return { letter, vi, pl, text: currentLang === 'vi' ? vi : (currentLang === 'pl' ? pl : `${vi} / ${pl}`) };
                   })
                 : [
-                    { letter: 'Đ', vi: 'Đúng', pl: 'Prawda', text: currentLang === 'vi' ? 'Đúng' : (currentLang === 'pl' ? 'Prawda' : 'Đúng / Prawda') },
-                    { letter: 'S', vi: 'Sai', pl: 'Fałsz', text: currentLang === 'vi' ? 'Sai' : (currentLang === 'pl' ? 'Fałsz' : 'Sai / Fałsz') }
+                    { letter: 'A', vi: q.option_a_vi || 'Đúng', pl: q.option_a_pl || 'Prawda', text: currentLang === 'vi' ? (q.option_a_vi || 'Đúng') : (currentLang === 'pl' ? (q.option_a_pl || 'Prawda') : `${q.option_a_vi || 'Đúng'} / ${q.option_a_pl || 'Prawda'}`) },
+                    { letter: 'B', vi: q.option_b_vi || 'Sai', pl: q.option_b_pl || 'Fałsz', text: currentLang === 'vi' ? (q.option_b_vi || 'Sai') : (currentLang === 'pl' ? (q.option_b_pl || 'Fałsz') : `${q.option_b_vi || 'Sai'} / ${q.option_b_pl || 'Fałsz'}`) }
                   ];
 
             options.forEach(opt => {
@@ -1111,11 +1111,13 @@
             const options = isSpecial
                 ? ['A', 'B', 'C'].map((letter, i) => ({
                     letter,
-                    text: q[`option_${String.fromCharCode(97+i)}_pl`] || q[`option_${String.fromCharCode(97+i)}_vi`]
+                    vi: q[`option_${String.fromCharCode(97+i)}_vi`],
+                    pl: q[`option_${String.fromCharCode(97+i)}_pl`],
+                    text: `${q[`option_${String.fromCharCode(97+i)}_vi`]} / ${q[`option_${String.fromCharCode(97+i)}_pl`]}`
                   }))
                 : [
-                    { letter: 'Đ', text: 'Đúng / Prawda' },
-                    { letter: 'S', text: 'Sai / Fałsz' }
+                    { letter: 'A', vi: q.option_a_vi, pl: q.option_a_pl, text: `${q.option_a_vi} / ${q.option_a_pl}` },
+                    { letter: 'B', vi: q.option_b_vi, pl: q.option_b_pl, text: `${q.option_b_vi} / ${q.option_b_pl}` }
                   ];
 
             const questionHtml = `
@@ -1130,7 +1132,10 @@
                     ${options.filter(o => o.text).map(opt => `
                         <div class="option" onclick="selectQuizOption(this, '${opt.letter}')">
                             <span class="option-letter">${opt.letter}</span>
-                            <span class="option-text">${opt.text}</span>
+                            <div class="option-text">
+                                <div>${opt.vi || ''}</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;">${opt.pl || ''}</div>
+                            </div>
                         </div>
                     `).join('')}
                 </div>
