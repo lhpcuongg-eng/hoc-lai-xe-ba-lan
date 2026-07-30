@@ -1092,31 +1092,42 @@
 
         // Progress
         function loadProgress() {
+            console.log('loadProgress called, questions.length:', questions.length);
             try {
                 const saved = localStorage.getItem('b1_progress');
                 if (saved) {
                     const oldProgress = JSON.parse(saved);
-                    // Nếu progress cũ có format số (index), convert sang format mới
+                    console.log('Loaded progress, answered count:', oldProgress.answeredQuestions?.length);
                     if (oldProgress.answeredQuestions && oldProgress.answeredQuestions.length > 0) {
                         const firstItem = oldProgress.answeredQuestions[0];
+                        console.log('First item type:', typeof firstItem, firstItem);
                         if (typeof firstItem === 'number') {
-                            // Format cũ: số index, cần convert sang string key
-                            console.log('Converting old progress format...');
-                            const newAnswered = oldProgress.answeredQuestions.map(idx => `q_${idx}`);
-                            const newCorrect = oldProgress.correctAnswers.map(idx => `q_${idx}`);
+                            // Format cũ: số index, convert sang id
+                            console.log('Converting old progress (index-based) to new format (id-based)...');
+                            const newAnswered = oldProgress.answeredQuestions.map(idx => {
+                                const q = questions[idx];
+                                return q ? q.id : `old_${idx}`;
+                            }).filter(id => id);
+                            const newCorrect = oldProgress.correctAnswers.map(idx => {
+                                const q = questions[idx];
+                                return q ? q.id : `old_${idx}`;
+                            }).filter(id => id);
                             progress = {
                                 ...oldProgress,
                                 answeredQuestions: newAnswered,
                                 correctAnswers: newCorrect
                             };
                             saveProgress();
-                            console.log('Progress converted. New format:', progress.answeredQuestions.slice(0, 3));
+                            console.log('Converted! New answered:', progress.answeredQuestions.slice(0, 5));
                         } else {
                             progress = oldProgress;
+                            console.log('Using existing format, sample:', progress.answeredQuestions.slice(0, 3));
                         }
                     } else {
                         progress = oldProgress;
                     }
+                } else {
+                    console.log('No saved progress found');
                 }
             } catch (e) {
                 console.error('Error loading progress:', e);
@@ -1159,33 +1170,23 @@
             const basicQuestions = questions.filter(q => q.question_type === 'basic');
             const specialQuestions = questions.filter(q => q.question_type === 'special');
             
-            // Tạo map để tra cứu nhanh
-            const answeredSet = new Set(progress.answeredQuestions);
+            // Tạo set từ answeredQuestions (so sánh bằng id)
+            const answeredIds = new Set(progress.answeredQuestions);
             
-            // Đếm basic đã trả lời
+            // Đếm basic đã trả lời (so sánh bằng id)
             let basicAnswered = 0;
             basicQuestions.forEach(q => {
-                const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
-                const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${questions.indexOf(q)}`;
-                if (answeredSet.has(questionKey)) {
-                    basicAnswered++;
-                    console.log('Basic matched:', questionKey);
-                }
+                if (answeredIds.has(q.id)) basicAnswered++;
             });
             
-            // Đếm special đã trả lời
+            // Đếm special đã trả lời (so sánh bằng id)
             let specialAnswered = 0;
             specialQuestions.forEach(q => {
-                const idxInQuestions = questions.findIndex(q2 => q2.id === q.id);
-                const questionKey = idxInQuestions >= 0 ? `q_${idxInQuestions}` : `q_${questions.indexOf(q)}`;
-                if (answeredSet.has(questionKey)) {
-                    specialAnswered++;
-                    console.log('Special matched:', questionKey);
-                }
+                if (answeredIds.has(q.id)) specialAnswered++;
             });
             
-            console.log('Stats: basicAnswered=', basicAnswered, '/', basicQuestions.length, ', specialAnswered=', specialAnswered, '/', specialQuestions.length);
-            console.log('answeredSet contents:', [...answeredSet]);
+            console.log('answeredIds:', [...answeredIds]);
+            console.log('basicAnswered:', basicAnswered, 'specialAnswered:', specialAnswered);
             
             document.getElementById('stat-basic').textContent = `${basicAnswered} / ${basicQuestions.length}`;
             document.getElementById('stat-special').textContent = `${specialAnswered} / ${specialQuestions.length}`;
