@@ -1135,14 +1135,16 @@
             // Đếm basic đã trả lời
             let basicAnswered = 0;
             basicQuestions.forEach(q => {
-                const qId = q.id || q.question_type + '_' + questions.indexOf(q);
+                const idx = questions.findIndex(q2 => q2.id === q.id && q2.question_type === q.question_type);
+                const qId = idx >= 0 ? idx : questions.indexOf(q);
                 if (answeredSet.has(qId)) basicAnswered++;
             });
             
             // Đếm special đã trả lời
             let specialAnswered = 0;
             specialQuestions.forEach(q => {
-                const qId = q.id || q.question_type + '_' + questions.indexOf(q);
+                const idx = questions.findIndex(q2 => q2.id === q.id && q2.question_type === q.question_type);
+                const qId = idx >= 0 ? idx : questions.indexOf(q);
                 if (answeredSet.has(qId)) specialAnswered++;
             });
             
