@@ -899,7 +899,7 @@
             typeEl.className = 'question-type ' + (isSpecial ? 'special' : 'basic');
             
             // Counter
-            document.getElementById('q-counter').textContent = `${currentIndex + 1} / ${questions.length}`;
+            document.getElementById('q-counter').textContent = `${currentIndex + 1} / ${filteredQuestions.length}`;
             
             // Question text - show both languages if bilingual mode
             let questionEl = document.getElementById('q-text');
