@@ -1027,16 +1027,26 @@
         }
 
         function nextQuestion() {
-            if (currentIndex < filteredQuestions.length - 1) {
-                currentIndex++;
+            // Pick random question from same category
+            if (filteredQuestions.length > 1) {
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * filteredQuestions.length);
+                } while (newIndex === currentIndex && filteredQuestions.length > 1);
+                currentIndex = newIndex;
                 selectedAnswer = null;
                 renderQuestion();
             }
         }
         
         function prevQuestion() {
-            if (currentIndex > 0) {
-                currentIndex--;
+            // Pick random question from same category
+            if (filteredQuestions.length > 1) {
+                let newIndex;
+                do {
+                    newIndex = Math.floor(Math.random() * filteredQuestions.length);
+                } while (newIndex === currentIndex && filteredQuestions.length > 1);
+                currentIndex = newIndex;
                 selectedAnswer = null;
                 renderQuestion();
             }
