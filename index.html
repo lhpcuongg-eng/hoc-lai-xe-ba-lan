@@ -1123,30 +1123,30 @@
             
             document.getElementById('stat-best').textContent = progress.quizBestScore;
             
-            // Đếm số câu đã trả lời đúng cho từng loại
+            // Đếm số câu đã trả lời cho từng loại
             const basicQuestions = questions.filter(q => q.question_type === 'basic');
             const specialQuestions = questions.filter(q => q.question_type === 'special');
             
-            // Tạo map để tra cứu nhanh
+            // Tạo set để tra cứu nhanh
             const answeredSet = new Set(progress.answeredQuestions);
             const correctSet = new Set(progress.correctAnswers);
             
-            // Đếm basic đúng
-            let basicCorrect = 0;
+            // Đếm basic đã trả lời
+            let basicAnswered = 0;
             basicQuestions.forEach(q => {
                 const qId = q.id || q.question_type + '_' + questions.indexOf(q);
-                if (answeredSet.has(qId) && correctSet.has(qId)) basicCorrect++;
+                if (answeredSet.has(qId)) basicAnswered++;
             });
             
-            // Đếm special đúng
-            let specialCorrect = 0;
+            // Đếm special đã trả lời
+            let specialAnswered = 0;
             specialQuestions.forEach(q => {
                 const qId = q.id || q.question_type + '_' + questions.indexOf(q);
-                if (answeredSet.has(qId) && correctSet.has(qId)) specialCorrect++;
+                if (answeredSet.has(qId)) specialAnswered++;
             });
             
-            document.getElementById('stat-basic').textContent = `${basicCorrect} / ${basicQuestions.length}`;
-            document.getElementById('stat-special').textContent = `${specialCorrect} / ${specialQuestions.length}`;
+            document.getElementById('stat-basic').textContent = `${basicAnswered} / ${basicQuestions.length}`;
+            document.getElementById('stat-special').textContent = `${specialAnswered} / ${specialQuestions.length}`;
             
             document.getElementById('stat-quiz-count').textContent = progress.quizCount;
             document.getElementById('stat-last-date').textContent = progress.lastStudyDate
