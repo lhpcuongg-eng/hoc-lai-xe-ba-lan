@@ -1138,19 +1138,27 @@
             localStorage.setItem('b1_progress', JSON.stringify(progress));
         }
 
-        function saveAnswer(questionIndex, isCorrect, questionType) {
-            if (!progress.answeredQuestions.includes(questionIndex)) {
-                progress.answeredQuestions.push(questionIndex);
+        function saveAnswer(questionId, isCorrect, questionType) {
+            // Chuyển đổi để so sánh (cả string và number đều work)
+            const questionIdStr = String(questionId);
+            const alreadyAnswered = progress.answeredQuestions.some(a => String(a) === questionIdStr);
+            
+            if (!alreadyAnswered) {
+                progress.answeredQuestions.push(questionId);
                 
                 if (questionType === 'basic') progress.basicLearned++;
                 else if (questionType === 'special') progress.specialLearned++;
             }
-            if (isCorrect && !progress.correctAnswers.includes(questionIndex)) {
-                progress.correctAnswers.push(questionIndex);
+            if (isCorrect) {
+                const questionIdStr2 = String(questionId);
+                if (!progress.correctAnswers.some(a => String(a) === questionIdStr2)) {
+                    progress.correctAnswers.push(questionId);
+                }
             }
             progress.lastStudyDate = new Date().toISOString();
             
             saveProgress();
+            console.log('saveAnswer:', questionId, 'type:', questionType, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
         }
 
         function updateProgressStats() {
