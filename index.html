@@ -884,7 +884,12 @@
 
         async function loadFromSupabase() {
             try {
-                const { data, error } = await sbClient.from('questions').select('*').order('id');
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const { data, error } = await sbClient.from('questions').select('*').order('id', { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
                 if (error) throw error;
 
                 questions = data;
