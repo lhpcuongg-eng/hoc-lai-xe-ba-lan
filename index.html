@@ -804,6 +804,10 @@
 
         // Initialize
         async function init() {
+            // TEMP: Xóa progress cũ để test sạch
+            localStorage.removeItem('b1_progress');
+            progress = { answeredQuestions: [], correctAnswers: [], quizBestScore: 0, quizCount: 0, lastStudyDate: null, basicLearned: 0, specialLearned: 0 };
+            
             if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
                 showError('Vui lòng cập nhật SUPABASE_URL và SUPABASE_KEY trong code!');
                 return;
