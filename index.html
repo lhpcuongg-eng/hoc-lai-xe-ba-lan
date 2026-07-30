@@ -1029,8 +1029,17 @@
         }
 
         function nextQuestion() {
-            if (currentIndex < questions.length - 1) {
+            if (currentIndex < filteredQuestions.length - 1) {
                 currentIndex++;
+                selectedAnswer = null;
+                renderQuestion();
+            }
+        }
+        
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                selectedAnswer = null;
                 renderQuestion();
             }
         }
