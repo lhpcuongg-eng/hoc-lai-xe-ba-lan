@@ -1014,9 +1014,10 @@
                 }
             }
             
-            // Save progress
+            // Save progress - dùng question.id thay vì index
             const isCorrect = letter === correct;
-            saveAnswer(currentIndex, isCorrect, q.question_type);
+            const questionId = q.id || q.question_type + '_' + currentIndex;
+            saveAnswer(questionId, isCorrect, q.question_type);
         }
 
         function prevQuestion() {
