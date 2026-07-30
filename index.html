@@ -1178,23 +1178,20 @@
             const basicQuestions = questions.filter(q => q.question_type === 'basic');
             const specialQuestions = questions.filter(q => q.question_type === 'special');
             
-            // Tạo set từ answeredQuestions (so sánh bằng id)
-            const answeredIds = new Set(progress.answeredQuestions);
+            // Tạo set từ answeredQuestions - convert về string để so sánh
+            const answeredSet = new Set(progress.answeredQuestions.map(a => String(a)));
             
-            // Đếm basic đã trả lời (so sánh bằng id)
+            // Đếm basic đã trả lời
             let basicAnswered = 0;
             basicQuestions.forEach(q => {
-                if (answeredIds.has(q.id)) basicAnswered++;
+                if (answeredSet.has(String(q.id))) basicAnswered++;
             });
             
-            // Đếm special đã trả lời (so sánh bằng id)
+            // Đếm special đã trả lời
             let specialAnswered = 0;
             specialQuestions.forEach(q => {
-                if (answeredIds.has(q.id)) specialAnswered++;
+                if (answeredSet.has(String(q.id))) specialAnswered++;
             });
-            
-            console.log('answeredIds:', [...answeredIds]);
-            console.log('basicAnswered:', basicAnswered, 'specialAnswered:', specialAnswered);
             
             document.getElementById('stat-basic').textContent = `${basicAnswered} / ${basicQuestions.length}`;
             document.getElementById('stat-special').textContent = `${specialAnswered} / ${specialQuestions.length}`;
