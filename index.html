@@ -867,6 +867,8 @@
         }
         
         function filterCategory(type) {
+            if (!questions || questions.length === 0) return; // Safety check
+            
             currentFilter = type;
             
             // Update button states
@@ -888,6 +890,8 @@
         
         function renderQuestion() {
             const q = filteredQuestions[currentIndex];
+            if (!q) return; // Safety check
+            
             const t = translations[currentLang];
             
             // Type badge
@@ -979,6 +983,8 @@
             if (selectedAnswer) return;
             
             const q = filteredQuestions[currentIndex];
+            if (!q) return; // Safety check
+            
             const correct = (q.correct_answer || '').toUpperCase();
             selectedAnswer = letter;
             
@@ -1020,10 +1026,6 @@
             // Save progress - dùng questionKey thay vì index
             const isCorrect = letter === correct;
             saveAnswer(questionKey, isCorrect, q.question_type);
-            
-            // Debug log
-            console.log('Saved answer:', questionKey, 'type:', q.question_type, 'correct:', isCorrect);
-            console.log('Current answeredQuestions:', progress.answeredQuestions);
             
             // Cập nhật stats ngay sau khi trả lời
             updateProgressStats();
@@ -1106,19 +1108,21 @@
         function saveAnswer(questionIndex, isCorrect, questionType) {
             if (!progress.answeredQuestions.includes(questionIndex)) {
                 progress.answeredQuestions.push(questionIndex);
+                
+                if (questionType === 'basic') progress.basicLearned++;
+                else if (questionType === 'special') progress.specialLearned++;
             }
             if (isCorrect && !progress.correctAnswers.includes(questionIndex)) {
                 progress.correctAnswers.push(questionIndex);
             }
             progress.lastStudyDate = new Date().toISOString();
             
-            if (questionType === 'basic') progress.basicLearned++;
-            else if (questionType === 'special') progress.specialLearned++;
-            
             saveProgress();
         }
 
         function updateProgressStats() {
+            if (!questions || questions.length === 0) return; // Safety check
+            
             document.getElementById('stat-total').textContent = questions.length || 0;
             document.getElementById('stat-answered').textContent = progress.answeredQuestions.length;
             
