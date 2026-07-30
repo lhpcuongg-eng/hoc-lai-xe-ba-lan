@@ -1014,9 +1014,9 @@
                 }
             }
             
-            // Save progress - dùng question.id thay vì index
+            // Save progress - tìm index thực trong mảng questions gốc
             const isCorrect = letter === correct;
-            const questionId = q.id || q.question_type + '_' + currentIndex;
+            const questionId = q.id || q.question_type + '_' + questions.indexOf(q);
             saveAnswer(questionId, isCorrect, q.question_type);
         }
 
