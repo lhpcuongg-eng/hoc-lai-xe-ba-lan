@@ -824,8 +824,8 @@
             document.getElementById('learn-content').style.display = 'none';
 
             try {
-                // Using REST API directly
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/questions?select=*&limit=50`, {
+                // Using REST API directly - lấy tất cả câu hỏi
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/questions?select=*&order=id.asc`, {
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`
