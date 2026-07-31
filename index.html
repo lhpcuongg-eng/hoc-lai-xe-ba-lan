@@ -327,22 +327,36 @@
         }
         
         .question-type {
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: var(--radius-full);
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .question-type.basic {
-            background: #dbeafe;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
             color: #1d4ed8;
+            border: 2px solid #3b82f6;
         }
         
         .question-type.special {
-            background: #fef3c7;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
             color: #d97706;
+            border: 2px solid #f59e0b;
+        }
+        
+        .question-type.basic::before {
+            content: "📘";
+        }
+        
+        .question-type.special::before {
+            content: "📗";
         }
         
         .question-counter {
@@ -1101,7 +1115,8 @@
                   })
                 : [
                     { letter: 'A', vi: q.option_a_vi || 'Đúng', pl: q.option_a_pl || 'Prawda', text: currentLang === 'vi' ? (q.option_a_vi || 'Đúng') : (currentLang === 'pl' ? (q.option_a_pl || 'Prawda') : `${q.option_a_vi || 'Đúng'} / ${q.option_a_pl || 'Prawda'}`) },
-                    { letter: 'B', vi: q.option_b_vi || 'Sai', pl: q.option_b_pl || 'Fałsz', text: currentLang === 'vi' ? (q.option_b_vi || 'Sai') : (currentLang === 'pl' ? (q.option_b_pl || 'Fałsz') : `${q.option_b_vi || 'Sai'} / ${q.option_b_pl || 'Fałsz'}`) }
+                    { letter: 'B', vi: q.option_b_vi || 'Sai', pl: q.option_b_pl || 'Fałsz', text: currentLang === 'vi' ? (q.option_b_vi || 'Sai') : (currentLang === 'pl' ? (q.option_b_pl || 'Fałsz') : `${q.option_b_vi || 'Sai'} / ${q.option_b_pl || 'Fałsz'}`) },
+                    { letter: 'C', vi: q.option_c_vi || '', pl: q.option_c_pl || '', text: currentLang === 'vi' ? (q.option_c_vi || '') : (currentLang === 'pl' ? (q.option_c_pl || '') : `${q.option_c_vi || ''} / ${q.option_c_pl || ''}`) }
                   ];
 
             options.forEach(opt => {
@@ -1472,7 +1487,8 @@
                   }))
                 : [
                     { letter: 'A', vi: q.option_a_vi, pl: q.option_a_pl, text: `${q.option_a_vi} / ${q.option_a_pl}` },
-                    { letter: 'B', vi: q.option_b_vi, pl: q.option_b_pl, text: `${q.option_b_vi} / ${q.option_b_pl}` }
+                    { letter: 'B', vi: q.option_b_vi, pl: q.option_b_pl, text: `${q.option_b_vi} / ${q.option_b_pl}` },
+                    { letter: 'C', vi: q.option_c_vi, pl: q.option_c_pl, text: `${q.option_c_vi} / ${q.option_c_pl}` }
                   ];
 
             const questionHtml = `
