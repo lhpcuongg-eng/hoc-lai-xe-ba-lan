@@ -7,6 +7,7 @@
     <!-- No Supabase SDK - using REST API directly -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -39,11 +40,144 @@
             line-height: 1.6;
         }
         
+        /* Login Page */
+        .login-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .login-page.hidden {
+            display: none;
+        }
+        
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .login-card h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        
+        .login-card p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-gradient);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+        }
+        
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        .login-divider span {
+            padding: 0 16px;
+            font-size: 0.85rem;
+        }
+        
+        .login-alt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .login-alt a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .login-error {
+            background: #fef2f2;
+            color: var(--danger);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .login-success {
+            background: #f0fdf4;
+            color: var(--success);
+            padding: 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
         .app {
             max-width: 480px;
             margin: 0 auto;
             min-height: 100vh;
             background: var(--bg-light);
+        }
+        
+        .app.hidden {
+            display: none;
         }
         
         /* Header */
@@ -540,13 +674,53 @@
             .tab { padding: 10px 12px; font-size: 0.8rem; }
         }
     </style>
-</head>
-<body>
-    <div class="app">
+    </head>
+    <body>
+        <!-- Login Page -->
+        <div id="login-page" class="login-page">
+            <div class="login-card">
+                <h1>🚗 Học Lái Xe B1</h1>
+                <p id="login-subtitle">Đăng nhập để tiếp tục</p>
+                
+                <div id="login-error" class="login-error"></div>
+                <div id="login-success" class="login-success"></div>
+                
+                <form id="login-form">
+                    <input type="text" id="login-nickname" class="login-input" placeholder="Nickname" required>
+                    <input type="password" id="login-password" class="login-input" placeholder="Mật khẩu" required>
+                    <div id="signup-birthday" style="display:none; margin-bottom: 16px;">
+                        <label style="display: block; text-align: left; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem;">Ngày sinh</label>
+                        <input type="date" id="login-birthday" class="login-input">
+                    </div>
+                    <button type="submit" class="login-btn">Đăng Nhập</button>
+                </form>
+                
+                <div class="login-divider"><span>hoặc</span></div>
+                
+                <p class="login-alt">
+                    Chưa có tài khoản? <a href="#" id="signup-link" style="color: var(--primary); text-decoration: none; font-weight: 600; cursor: pointer;">Đăng ký</a>
+                </p>
+                
+                <div id="login-toggle" style="margin-top: 16px; display: none;">
+                    <button onclick="switchToLogin()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.9rem;">
+                        ← Quay lại đăng nhập
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="app hidden" id="main-app">
         <!-- Header -->
         <div class="header">
-            <h1>🚗 Học Lái Xe Bằng B1</h1>
-            <p>Ba Lan - Thi Thử Chính Thức</p>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🚗 Học Lái Xe Bằng B1</h1>
+                    <p>Ba Lan - Thi Thử Chính Thức</p>
+                </div>
+                <button onclick="handleLogout()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;">
+                    <span id="user-display">👤</span> Logout
+                </button>
+            </div>
             <div class="lang-switcher">
                 <button class="lang-btn active" onclick="switchLang('vi')">🇻🇳 Tiếng Việt</button>
                 <button class="lang-btn" onclick="switchLang('pl')">🇵🇱 Polski</button>
@@ -802,26 +976,6 @@
             }
         };
 
-        // Initialize
-        async function init() {
-            // TEMP: Xóa progress cũ để test sạch
-            localStorage.removeItem('b1_progress');
-            progress = { answeredQuestions: [], correctAnswers: [], quizBestScore: 0, quizCount: 0, lastStudyDate: null, basicLearned: 0, specialLearned: 0 };
-            
-            if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-                showError('Vui lòng cập nhật SUPABASE_URL và SUPABASE_KEY trong code!');
-                return;
-            }
-
-            try {
-                await loadQuestions();
-                loadProgress();
-                updateProgressStats();
-            } catch (err) {
-                showError(err.message);
-            }
-        }
-
         async function loadQuestions() {
             document.getElementById('learn-loading').style.display = 'block';
             document.getElementById('learn-error').style.display = 'none';
@@ -1026,7 +1180,6 @@
             
             // Lưu theo id trong mảng questions gốc (nhất quán khi chuyển filter)
             const isCorrect = letter === correct;
-            console.log('selectOption: q.id =', q.id, 'type:', q.question_type);
             saveAnswer(q.id, isCorrect, q.question_type);
             
             // Cập nhật stats ngay sau khi trả lời
@@ -1095,55 +1248,66 @@
             if (tab === 'progress') updateProgressStats();
         }
 
-        // Progress
-        function loadProgress() {
+        // Progress - load từ Supabase theo user
+        async function loadProgress() {
             console.log('loadProgress called, questions.length:', questions.length);
+            
+            // Nếu chưa đăng nhập, không load gì
+            if (!currentUser) {
+                progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
+                return;
+            }
+            
             try {
-                const saved = localStorage.getItem('b1_progress');
-                if (saved) {
-                    const oldProgress = JSON.parse(saved);
-                    console.log('Loaded progress, answered count:', oldProgress.answeredQuestions?.length);
-                    if (oldProgress.answeredQuestions && oldProgress.answeredQuestions.length > 0) {
-                        const firstItem = oldProgress.answeredQuestions[0];
-                        console.log('First item type:', typeof firstItem, firstItem);
-                        if (typeof firstItem === 'number') {
-                            // Format cũ: số index, convert sang id
-                            console.log('Converting old progress (index-based) to new format (id-based)...');
-                            const newAnswered = oldProgress.answeredQuestions.map(idx => {
-                                const q = questions[idx];
-                                return q ? q.id : `old_${idx}`;
-                            }).filter(id => id);
-                            const newCorrect = oldProgress.correctAnswers.map(idx => {
-                                const q = questions[idx];
-                                return q ? q.id : `old_${idx}`;
-                            }).filter(id => id);
-                            progress = {
-                                ...oldProgress,
-                                answeredQuestions: newAnswered,
-                                correctAnswers: newCorrect
-                            };
-                            saveProgress();
-                            console.log('Converted! New answered:', progress.answeredQuestions.slice(0, 5));
-                        } else {
-                            progress = oldProgress;
-                            console.log('Using existing format, sample:', progress.answeredQuestions.slice(0, 3));
-                        }
+                // Thử load từ Supabase
+                if (!initSupabase()) {
+                    // Fallback: localStorage theo user
+                    const saved = localStorage.getItem(`b1_progress_${currentUser.id}`);
+                    if (saved) {
+                        progress = JSON.parse(saved);
                     } else {
-                        progress = oldProgress;
+                        progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
                     }
+                    return;
+                }
+                
+                const { data: dbProgress, error } = await supabaseClient
+                    .from('user_progress')
+                    .select('question_id, is_correct')
+                    .eq('user_id', currentUser.id);
+                
+                if (error) {
+                    console.error('Error loading progress from DB:', error);
+                    // Fallback localStorage
+                    const saved = localStorage.getItem(`b1_progress_${currentUser.id}`);
+                    progress = saved ? JSON.parse(saved) : { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
+                    return;
+                }
+                
+                if (dbProgress && dbProgress.length > 0) {
+                    progress.answeredQuestions = dbProgress.map(p => p.question_id);
+                    progress.correctAnswers = dbProgress.filter(p => p.is_correct).map(p => p.question_id);
+                    progress.basicLearned = progress.correctAnswers.length;
+                    progress.specialLearned = 0;
+                    progress.quizBestScore = progress.quizBestScore || 0;
+                    progress.quizCount = progress.quizCount || 0;
+                    console.log('Loaded', progress.answeredQuestions.length, 'answers from DB');
                 } else {
-                    console.log('No saved progress found');
+                    progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
                 }
             } catch (e) {
                 console.error('Error loading progress:', e);
+                progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
             }
         }
 
         function saveProgress() {
-            localStorage.setItem('b1_progress', JSON.stringify(progress));
+            if (!currentUser) return;
+            // Lưu local fallback theo user
+            localStorage.setItem(`b1_progress_${currentUser.id}`, JSON.stringify(progress));
         }
 
-        function saveAnswer(questionId, isCorrect, questionType) {
+        async function saveAnswer(questionId, isCorrect, questionType) {
             // Chuyển đổi để so sánh (cả string và number đều work)
             const questionIdStr = String(questionId);
             const alreadyAnswered = progress.answeredQuestions.some(a => String(a) === questionIdStr);
@@ -1163,7 +1327,29 @@
             progress.lastStudyDate = new Date().toISOString();
             
             saveProgress();
-            console.log('saveAnswer:', questionId, 'type:', questionType, 'basicLearned:', progress.basicLearned, 'specialLearned:', progress.specialLearned);
+            
+            // Lưu vào Supabase
+            if (currentUser && initSupabase()) {
+                console.log('Saving progress to DB:', { user_id: currentUser.id, question_id: questionId, is_correct: isCorrect });
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('user_progress')
+                        .insert({
+                            user_id: currentUser.id,
+                            question_id: questionId,
+                            is_correct: isCorrect
+                        });
+                    if (error) {
+                        console.error('Error saving progress to DB:', error);
+                    } else {
+                        console.log('Progress saved to DB successfully');
+                    }
+                } catch (err) {
+                    console.error('Error saving progress:', err);
+                }
+            } else {
+                console.log('Not logged in or Supabase not initialized, skipping DB save');
+            }
         }
 
         function updateProgressStats() {
@@ -1207,7 +1393,7 @@
                 : '--';
         }
 
-        function resetProgress() {
+        async function resetProgress() {
             if (confirm('Bạn có chắc muốn xóa tiến độ?')) {
                 progress = {
                     answeredQuestions: [],
@@ -1218,7 +1404,17 @@
                     basicLearned: 0,
                     specialLearned: 0
                 };
-                localStorage.removeItem('b1_progress');
+                localStorage.removeItem(`b1_progress_${currentUser?.id}`);
+                
+                // Xóa từ Supabase
+                if (currentUser && initSupabase()) {
+                    await supabaseClient
+                        .from('user_progress')
+                        .delete()
+                        .eq('user_id', currentUser.id)
+                        .catch(err => console.error('Error deleting progress:', err));
+                }
+                
                 updateProgressStats();
             }
         }
@@ -1374,6 +1570,274 @@
         }
 
         // Start
+        // Supabase Auth
+        let supabaseClient = null;
+        let isSignupMode = false;
+        let currentUser = null;
+        
+        function initSupabase() {
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return false;
+            if (typeof window.supabase === 'undefined') return false;
+            if (supabaseClient) return true;
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            return true;
+        }
+        
+        function setupLoginEvents() {
+            const form = document.getElementById('login-form');
+            const btn = form.querySelector('.login-btn');
+            const signupLink = document.getElementById('signup-link');
+            const loginToggle = document.getElementById('login-toggle');
+            
+            signupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                isSignupMode = true;
+                document.getElementById('signup-birthday').style.display = 'block';
+                document.getElementById('login-subtitle').textContent = 'Tạo tài khoản mới';
+                btn.textContent = 'Đăng Ký';
+                signupLink.style.display = 'none';
+                loginToggle.style.display = 'block';
+            });
+            
+            loginToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                isSignupMode = false;
+                document.getElementById('signup-birthday').style.display = 'none';
+                document.getElementById('login-subtitle').textContent = 'Đăng nhập để tiếp tục';
+                btn.textContent = 'Đăng Nhập';
+                signupLink.style.display = 'inline';
+                loginToggle.style.display = 'none';
+                document.getElementById('login-error').style.display = 'none';
+                document.getElementById('login-success').style.display = 'none';
+            });
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isSignupMode) {
+                    doSignup();
+                } else {
+                    doLogin();
+                }
+                return false;
+            });
+        }
+        
+        async function doLogin() {
+            const nickname = document.getElementById('login-nickname').value.trim();
+            const password = document.getElementById('login-password').value;
+            const btn = document.querySelector('.login-btn');
+            const errorEl = document.getElementById('login-error');
+            const successEl = document.getElementById('login-success');
+            
+            if (!nickname) {
+                errorEl.textContent = 'Vui lòng nhập nickname';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Đang đăng nhập...';
+            
+            try {
+                if (!initSupabase()) {
+                    throw new Error('Chưa cấu hình Supabase');
+                }
+                
+                // Tìm user trong database
+                const { data: userData, error: userError } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('nickname', nickname)
+                    .single();
+                
+                if (userError || !userData) {
+                    throw new Error('Nickname không tồn tại');
+                }
+                
+                // Kiểm tra password (so sánh trực tiếp)
+                if (userData.password !== password) {
+                    throw new Error('Mật khẩu không đúng');
+                }
+                
+                currentUser = userData;
+                localStorage.setItem('b1_user', JSON.stringify(userData));
+                
+                successEl.textContent = 'Đăng nhập thành công!';
+                successEl.style.display = 'block';
+                
+                setTimeout(async () => {
+                    showMainApp();
+                    updateUserDisplay();
+                    await loadQuestions();
+                    await loadProgress();
+                    updateProgressStats();
+                }, 500);
+            } catch (err) {
+                errorEl.textContent = err.message || 'Đăng nhập thất bại';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Đăng Nhập';
+            }
+        }
+        
+        async function doSignup() {
+            const nickname = document.getElementById('login-nickname').value.trim();
+            const password = document.getElementById('login-password').value;
+            const birthday = document.getElementById('login-birthday').value;
+            const btn = document.querySelector('.login-btn');
+            const errorEl = document.getElementById('login-error');
+            const successEl = document.getElementById('login-success');
+            
+            if (!nickname || nickname.length < 3) {
+                errorEl.textContent = 'Nickname phải có ít nhất 3 ký tự';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            if (password.length < 6) {
+                errorEl.textContent = 'Mật khẩu phải có ít nhất 6 ký tự';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Đang đăng ký...';
+            
+            try {
+                if (!initSupabase()) {
+                    throw new Error('Chưa cấu hình Supabase');
+                }
+                
+                // Kiểm tra nickname đã tồn tại chưa
+                const { data: existingUser } = await supabaseClient
+                    .from('users')
+                    .select('nickname')
+                    .eq('nickname', nickname)
+                    .single();
+                
+                if (existingUser) {
+                    throw new Error('Nickname đã được sử dụng');
+                }
+                
+                // Tạo user mới với nickname và password
+                const { data: newUser, error: insertError } = await supabaseClient
+                    .from('users')
+                    .insert({
+                        nickname: nickname,
+                        password: password,
+                        birthday: birthday || null
+                    })
+                    .select()
+                    .single();
+                
+                if (insertError) throw insertError;
+                
+                currentUser = newUser;
+                localStorage.setItem('b1_user', JSON.stringify(newUser));
+                
+                successEl.textContent = 'Đăng ký thành công!';
+                successEl.style.display = 'block';
+                
+                setTimeout(async () => {
+                    showMainApp();
+                    updateUserDisplay();
+                    await loadQuestions();
+                    await loadProgress();
+                    updateProgressStats();
+                }, 500);
+            } catch (err) {
+                errorEl.textContent = err.message || 'Đăng ký thất bại';
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Đăng Ký';
+            }
+        }
+        
+        // === AUTH FUNCTIONS ===
+        
+        function updateUserDisplay() {
+            const userDisplay = document.getElementById('user-display');
+            if (userDisplay && currentUser) {
+                userDisplay.textContent = `👤 ${currentUser.nickname}`;
+            }
+        }
+        
+        async function checkAuth() {
+            const savedUser = localStorage.getItem('b1_user');
+            if (!savedUser) return false;
+            
+            try {
+                currentUser = JSON.parse(savedUser);
+                return true;
+            } catch {
+                localStorage.removeItem('b1_user');
+                return false;
+            }
+        }
+        
+        async function handleLogout() {
+            if (currentUser) {
+                localStorage.removeItem(`b1_user`);
+                localStorage.removeItem(`b1_progress_${currentUser.id}`);
+            }
+            currentUser = null;
+            progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null };
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            // Reset form
+            document.getElementById('login-nickname').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-birthday').value = '';
+            document.getElementById('login-error').style.display = 'none';
+            document.getElementById('login-success').style.display = 'none';
+        }
+        
+        function showMainApp() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+        }
+        
+        async function init() {
+            // Setup login events
+            setupLoginEvents();
+            
+            // Nếu chưa config Supabase, show app luôn
+            if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+                showMainApp();
+                showError('Vui lòng cập nhật SUPABASE_URL và SUPABASE_KEY trong code!');
+                try {
+                    await loadQuestions();
+                    loadProgress();
+                    updateProgressStats();
+                } catch (err) {
+                    showError(err.message);
+                }
+                return;
+            }
+
+            // Check login
+            const isLoggedIn = await checkAuth();
+            if (isLoggedIn) {
+                showMainApp();
+                updateUserDisplay();
+                try {
+                    await loadQuestions();
+                    loadProgress();
+                    updateProgressStats();
+                } catch (err) {
+                    showError(err.message);
+                }
+            }
+            // Nếu chưa login, hiện trang login
+        }
+        
+        // Start app
         init();
     </script>
 </body>
