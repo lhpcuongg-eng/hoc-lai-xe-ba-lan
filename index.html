@@ -1265,8 +1265,6 @@
 
         // Progress - load từ Supabase theo user
         async function loadProgress() {
-            console.log('loadProgress called, questions.length:', questions.length);
-            
             // Nếu chưa đăng nhập, không load gì
             if (!currentUser) {
                 progress = { answeredQuestions: [], correctAnswers: [], basicLearned: 0, specialLearned: 0, quizBestScore: 0, quizCount: 0, lastStudyDate: null, currentLesson: 1 };
@@ -1829,7 +1827,7 @@
                 showError('Vui lòng cập nhật SUPABASE_URL và SUPABASE_KEY trong code!');
                 try {
                     await loadQuestions();
-                    loadProgress();
+                    await loadProgress();
                     updateProgressStats();
                 } catch (err) {
                     showError(err.message);
@@ -1844,7 +1842,7 @@
                 updateUserDisplay();
                 try {
                     await loadQuestions();
-                    loadProgress();
+                    await loadProgress();
                     updateProgressStats();
                 } catch (err) {
                     showError(err.message);
